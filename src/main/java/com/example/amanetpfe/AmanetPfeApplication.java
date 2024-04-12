@@ -2,8 +2,12 @@ package com.example.amanetpfe;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling;
+
 
 @SpringBootApplication
+@EnableScheduling
+
 public class AmanetPfeApplication {
 
     public static void main(String[] args) {
