@@ -114,6 +114,14 @@
             <version>8.0.26</version> <!-- Use the appropriate version -->
         </dependency>
 
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+
+        </dependency>
+
+
     </dependencies>
 
     <build>

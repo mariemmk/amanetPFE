@@ -9,6 +9,7 @@ import java.util.Date;
 
 import javax.persistence.*;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -21,6 +22,7 @@ import lombok.experimental.FieldDefaults;
 @Table(name = "User")
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class User implements Serializable, UserDetails {
 
     @Id
@@ -60,11 +62,11 @@ public class User implements Serializable, UserDetails {
     @Column(name = "isBanned")
     Boolean isBanned;
 
-    @Column(name = "isPremium")
+  /*  @Column(name = "isPremium")
     Boolean isPremium;
 
     @Column(name = "dateStartPremium")
-    Date dateStartPremium;
+    Date dateStartPremium;*/
 
     @Column(name = "createdAt")
     Date createdAt;
