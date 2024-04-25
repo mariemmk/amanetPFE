@@ -1,5 +1,6 @@
 package com.example.amanetpfe.Entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,10 +18,11 @@ public class Account {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "idAccount")
-    private Long idAccount;
+    private Integer idAccount;
 
-    @OneToOne
-    @JoinColumn(name = "user_id") // Spécifie la colonne user_id
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    @JsonBackReference // Indique que c'est le côté inverse de la relation
     private User user;
 
     @Column(name = "accountNumber" , unique = true)
