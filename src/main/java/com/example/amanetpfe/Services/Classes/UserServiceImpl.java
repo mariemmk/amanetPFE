@@ -1,5 +1,7 @@
 package com.example.amanetpfe.Services.Classes;
 
+import com.example.amanetpfe.Entities.Account;
+import com.example.amanetpfe.Entities.Role;
 import com.example.amanetpfe.Entities.User;
 import com.example.amanetpfe.Repositories.IUserRepository;
 import com.example.amanetpfe.Services.Interfaces.IUserService;
@@ -29,6 +31,9 @@ public class UserServiceImpl implements IUserService {
     private IUserRepository userRepository ;
 
     @Autowired
+    private AccountService accountService;
+
+    @Autowired
     private PasswordEncoder bCryptPasswordEncoder;
 
     @Autowired
@@ -39,18 +44,38 @@ public class UserServiceImpl implements IUserService {
         return this.userRepository.findAll();
     }
 
-    @Override
     public User addUser(User user) {
         boolean test = isMailExisit(user);
         if (!isMailExisit(user)) {
-            user.setUserApplicationId(generateUniqueId());
+            // Encoder le mot de passe
             user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
             user.setLastPassword(bCryptPasswordEncoder.encode(user.getPassword()));
             user.setLastDateChangePassword(user.getCreatedAt());
-            return this.userRepository.save(user);
+
+            // Sauvegarder l'utilisateur dans la base de données
+            User savedUser = this.userRepository.save(user);
+
+            // Vérifier que le rôle de l'utilisateur est "USER"
+            if (user.getRole() == Role.USER) {
+                // Créer automatiquement un compte bancaire pour l'utilisateur
+                Account account = new Account();
+                account.setTotSolde(20.0);
+                // Associer l'utilisateur au compte
+                account.setUser(savedUser);
+                account.setDevise("TND");
+
+                // Sauvegarder le compte dans la base de données
+                account = accountService.saveAccount(account);
+
+                // Mettre à jour le champ account de l'utilisateur avec le compte sauvegardé
+                savedUser.setAccount(account);
+            }
+
+            return savedUser;
         }
         return null;
     }
+
 
     @Override
     public User retrieveUser(Integer idUser) {

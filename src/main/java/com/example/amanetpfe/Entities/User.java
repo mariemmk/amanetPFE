@@ -5,6 +5,7 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 
 import javax.persistence.*;
@@ -29,8 +30,6 @@ public class User implements Serializable, UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "idUser")
     Integer idUser;
-    @Column(name = "userApplicationId", unique = true)
-    Long userApplicationId ;
 
     @Column(name = "name")
     String name;
@@ -99,6 +98,10 @@ public class User implements Serializable, UserDetails {
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + this.role.name()));
     }
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "account_id", referencedColumnName = "idAccount")
+    private Account account;
 
     @Override
     public String getUsername() {
