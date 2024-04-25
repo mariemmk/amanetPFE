@@ -1,7 +1,9 @@
 package com.example.amanetpfe.Services.Classes;
 
 import com.example.amanetpfe.Entities.Account;
+import com.example.amanetpfe.Entities.User;
 import com.example.amanetpfe.Repositories.AccountRepository;
+import com.example.amanetpfe.Repositories.IUserRepository;
 import com.example.amanetpfe.Services.Interfaces.IAccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,10 +16,12 @@ import java.util.Random;
 public class AccountService  implements IAccountService {
 
     private final AccountRepository accountRepository;
+    private final IUserRepository userRepository;
 
     @Autowired
-    public AccountService(AccountRepository accountRepository) {
+    public AccountService(AccountRepository accountRepository, IUserRepository userRepository) {
         this.accountRepository = accountRepository;
+        this.userRepository = userRepository;
     }
     @Override
     public Account saveAccount(Account account) {
@@ -106,4 +110,24 @@ public class AccountService  implements IAccountService {
 
 
     }
-}
+
+
+    @Override
+    public String afficheIdentiteBancair(User user){
+        User u = this.userRepository.findById(user.getIdUser()).orElse(null);
+        String BIC= "CFCTTNTT";
+        if(u!= null ){
+         StringBuilder identiteBancaireBuilder = new StringBuilder();
+         identiteBancaireBuilder.append("Nom: ").append(u.getFamilyName()).append("\n");
+         identiteBancaireBuilder.append("Prénom: ").append(u.getName()).append("\n");
+            identiteBancaireBuilder.append("Date de naissance: ").append(u.getBirthDate()).append("\n");
+            identiteBancaireBuilder.append("Nature du Compte : ").append(u.getAccount().getAccountType()).append("\n");
+            identiteBancaireBuilder.append("RIB : ").append(u.getAccount().getRIB()).append("\n");
+            identiteBancaireBuilder.append("Code BIC : ").append(BIC).append("\n");
+
+            return identiteBancaireBuilder.toString();
+        }else{
+            return "utilisateur  non trouve";
+        }
+    }
+    }

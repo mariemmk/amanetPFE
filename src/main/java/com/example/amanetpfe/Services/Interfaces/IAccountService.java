@@ -1,6 +1,7 @@
 package com.example.amanetpfe.Services.Interfaces;
 
 import com.example.amanetpfe.Entities.Account;
+import com.example.amanetpfe.Entities.User;
 
 import java.util.List;
 import java.util.Optional;
@@ -27,4 +28,6 @@ public interface IAccountService {
     String generateAccountNumber();
 
     String generateRIB();
+
+    String afficheIdentiteBancair(User user);
 }

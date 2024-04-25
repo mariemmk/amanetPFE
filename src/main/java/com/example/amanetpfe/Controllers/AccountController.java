@@ -2,6 +2,7 @@ package com.example.amanetpfe.Controllers;
 
 import com.example.amanetpfe.Entities.Account;
 
+import com.example.amanetpfe.Entities.User;
 import com.example.amanetpfe.Services.Classes.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -65,4 +66,16 @@ public class AccountController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
+
+
+    @GetMapping("/user/{id}/identiteBancaire")
+    public String afficheIdentiteBancaire(@PathVariable("id") Integer userId) {
+        User user = new User(); // Créer un objet User avec l'ID fourni
+        user.setIdUser(userId);
+
+        // Appeler la méthode afficheIdentiteBancaire de AccountService
+        return accountService.afficheIdentiteBancair(user);
+    }
+
+
 }
