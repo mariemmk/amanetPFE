@@ -1,4 +1,4 @@
 package com.example.amanetpfe.Repositories;
 
-public class TransactionRepository {
+public interface TransactionRepository {
 }
