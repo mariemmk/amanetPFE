@@ -3,6 +3,10 @@ package com.example.amanetpfe.Controllers;
 import com.example.amanetpfe.Entities.ChangePasswordRequest;
 import com.example.amanetpfe.Entities.User;
 import com.example.amanetpfe.Services.Interfaces.IUserService;
+import com.example.amanetpfe.dto.BankResponse;
+import com.example.amanetpfe.dto.CreditDebitRequest;
+import com.example.amanetpfe.dto.EnquiryRequest;
+import com.example.amanetpfe.dto.UserRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +25,8 @@ import java.util.List;
 public class UserRestController {
     @Autowired
     private IUserService userService;
+
+
 
     @GetMapping("/show")
     @Operation(description = "show all users")
@@ -108,5 +114,33 @@ public class UserRestController {
     @PostMapping("/verifyOldPassword/{id}")
     public boolean verifyOldPassword(@PathVariable("id") Integer idUser ,@RequestBody String oldPassword){
         return userService.checkOldPassword(oldPassword, idUser);
+    }
+
+    @GetMapping("/balanceEnquiry")
+    public BankResponse balanceEnquiry(@RequestBody EnquiryRequest request){
+        return userService.balanceEnquiry(request);
+    }
+
+    @GetMapping("nameEnquiry")
+    public String nameEnquiry( @RequestBody  EnquiryRequest request){
+        return userService.nameEnquiry(request);
+    }
+
+
+    @PostMapping("creationAccount")
+    public  BankResponse creationAccount(@RequestBody UserRequest userRequest){
+        return userService.creationAccount(userRequest);
+
+
+    }
+
+    @PostMapping ("credit")
+    public BankResponse creditAccount(@RequestBody CreditDebitRequest request){
+        return  userService.creditAccount(request);
+    }
+
+    @PostMapping ("debit")
+    public BankResponse debitAccount(@RequestBody CreditDebitRequest request){
+        return  userService.debitAccount(request);
     }
 }

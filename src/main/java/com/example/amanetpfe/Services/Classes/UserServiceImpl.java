@@ -9,6 +9,9 @@ import com.example.amanetpfe.Services.Interfaces.IUserService;
 
 
 import javax.persistence.EntityNotFoundException;
+
+import com.example.amanetpfe.dto.*;
+import com.example.amanetpfe.utils.AccountUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,6 +21,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
@@ -265,6 +270,160 @@ public class UserServiceImpl implements IUserService {
             return null;
         }
     }
+
+    @Override
+    public BankResponse balanceEnquiry(EnquiryRequest request) {
+// check if account exist
+        boolean isAccountExist = userRepository.existsByAccountNumber(request.getAccountNumber());
+        if(!isAccountExist){
+            return BankResponse.builder()
+                    .responseCode(AccountUtils.ACCOUNT_NOT_EXIST_CODE)
+                    .responseMessage(AccountUtils.ACCOUNT_NOT_EXIST_MESSAGE)
+                    .accountInfo(null)
+                    .build();
+
+        }
+        User foundUser = userRepository.findByAccountNumber(request.getAccountNumber());
+        return  BankResponse.builder()
+                .responseMessage(AccountUtils.ACCOUNT_FOUND_SUCCESS)
+                .responseCode(AccountUtils.ACCOUNT_FOUND_CODE)
+                .accountInfo(AccountInfo.builder()
+                        .accountBalance(foundUser.getAccountBalance())
+                        .accountName(foundUser.getFirstName() + "" +foundUser.getFamilyName())
+                        .accountNumber(foundUser.getAccountNumber())
+                        .build())
+                .build();
+    }
+
+    @Override
+    public String nameEnquiry(EnquiryRequest request) {
+        boolean isAccountExist = userRepository.existsByAccountNumber(request.getAccountNumber());
+        if(!isAccountExist){
+            return AccountUtils.ACCOUNT_NOT_EXIST_MESSAGE;
+
+       }
+        User foundUser = userRepository.findByAccountNumber(request.getAccountNumber());
+        return foundUser.getFirstName()+" "+foundUser.getFamilyName()+""+foundUser.getOtherName();
+    }
+
+    @Override
+    public BankResponse creationAccount(UserRequest userRequest) {
+        /**
+         * Creating an account - saving new user into the db
+         * check if user already has an account
+         */
+        if (userRepository.existsByEmail(userRequest.getEmail())){
+            BankResponse response = BankResponse.builder()
+                    .responseCode(AccountUtils.ACCOUNT_EXISTS_CODE)
+                    .responseMessage(AccountUtils.ACCOUNT_EXIST_MESSAGE)
+                    .accountInfo(null)
+                    .build();
+            return response;
+        }
+        User newUser = User.builder()
+                .firstName(userRequest.getFirstName())
+                .familyName(userRequest.getFamilyName())
+                .otherName(userRequest.getOtherName())
+                .gender(userRequest.getGender())
+                .address(userRequest.getAddress())
+                .stateOfOrigin(userRequest.getStateOfOrigin())
+                .accountNumber(AccountUtils.generateAccountNumber())
+                .email(userRequest.getEmail())
+                .accountBalance(BigDecimal.ZERO)
+                .phoneNumber(userRequest.getPhoneNumber())
+                .alternativePhoneNumber(userRequest.getAlternativePhoneNumber())
+                .status("ACTIVE")
+                .build();
+        User savedUser = userRepository.save(newUser);
+return  BankResponse.builder()
+        .responseCode(AccountUtils.ACCOUNT_CREATION_SUCCESS)
+        .responseMessage(AccountUtils.ACCOUNT_CREATION_MESSAGE)
+        .accountInfo(AccountInfo.builder()
+                .accountBalance(savedUser.getAccountBalance())
+                .accountNumber(savedUser.getAccountNumber())
+                .accountName(savedUser.getFirstName()+savedUser.getFamilyName()+savedUser.getOtherName())
+
+                .build())
+        .build();
+    }
+
+    @Override
+    public BankResponse creditAccount(CreditDebitRequest request) {
+        //cheking if account exist
+        boolean isAccountExist = userRepository.existsByAccountNumber(request.getAccountNumber());
+        if(!isAccountExist){
+            return BankResponse.builder()
+                    .responseCode(AccountUtils.ACCOUNT_NOT_EXIST_CODE)
+                    .responseMessage(AccountUtils.ACCOUNT_NOT_EXIST_MESSAGE)
+                    .accountInfo(null)
+                    .build();
+
+        }
+
+        User userToCredit =userRepository.findByAccountNumber(request.getAccountNumber());
+        //update amount account balance + credit
+         userToCredit.setAccountBalance(userToCredit.getAccountBalance().add(request.getAmount()));
+         userRepository.save(userToCredit);
+
+        return  BankResponse.builder()
+                .responseMessage(AccountUtils.ACCOUNT_CREDITED_SUCCESS_MESSAGE)
+                .responseCode(AccountUtils.ACCOUNT_CREDITED_SUCCESS)
+                .accountInfo(AccountInfo.builder()
+                        .accountName(userToCredit.getFirstName()+" "+userToCredit.getFamilyName()+" "+userToCredit.getOtherName())
+                        .accountBalance(userToCredit.getAccountBalance())
+                        .accountNumber(userToCredit.getAccountNumber())
+                        .build()
+                )
+                .build();
+
+    }
+
+    @Override
+    public BankResponse debitAccount(CreditDebitRequest request) {
+        //check if account exist
+        //check if amount is valid
+        boolean isAccountExist = userRepository.existsByAccountNumber(request.getAccountNumber());
+        if(!isAccountExist){
+            return BankResponse.builder()
+                    .responseCode(AccountUtils.ACCOUNT_NOT_EXIST_CODE)
+                    .responseMessage(AccountUtils.ACCOUNT_NOT_EXIST_MESSAGE)
+                    .accountInfo(null)
+                    .build();
+
+        }
+
+      User userToDebit = userRepository.findByAccountNumber(request.getAccountNumber());
+
+        BigInteger availableBalance = userToDebit.getAccountBalance().toBigInteger()  ;
+        BigInteger debitAmount = request.getAmount().toBigInteger();
+        if( availableBalance.intValue()< debitAmount.intValue()){
+            return  BankResponse.builder()
+                    .responseCode(AccountUtils.INSUFFICIENT_BALANCE_CODE)
+                    .responseMessage(AccountUtils.INSUFFICIENT_BALANCE_MESSAGE)
+                    .accountInfo(null).
+                    build();
+        }
+        else {
+            userToDebit.setAccountBalance(userToDebit.getAccountBalance().subtract(request.getAmount()));
+            userRepository.save(userToDebit);
+            return  BankResponse.builder()
+                    .responseCode(AccountUtils.ACCOUNT_DEBITED_SUCCESS_CODE)
+                    .responseCode(AccountUtils.ACCOUNT_DEBITED_SUCCESS_MESSAGE)
+                    .accountInfo(AccountInfo.builder()
+                            .accountNumber(request.getAccountNumber())
+                            .accountName(userToDebit.getFirstName()+" "+userToDebit.getFamilyName())
+                            .accountBalance(userToDebit.getAccountBalance())
+                            .build())
+                    .build();
+        }
+
+    }
+
+    @Override
+    public BankResponse transfer(TransferRequest request) {
+        return null;
+    }
+
     public boolean checkOldPassword(String password, Integer idUser) {
         User user = userRepository.findById(idUser).orElse(null);
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
@@ -275,6 +434,11 @@ public class UserServiceImpl implements IUserService {
         }
         return false;
     }
+
+
+    //balance enquiry , name enquiry , credit , debit , transfer
+
+
 
 
 }

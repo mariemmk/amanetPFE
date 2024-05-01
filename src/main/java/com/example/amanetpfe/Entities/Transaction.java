@@ -1,15 +1,19 @@
 package com.example.amanetpfe.Entities;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.util.Date;
 
 @Entity
 @Getter
 @Setter
 @Table(name = "Transaction")
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+
 
 public class Transaction {
     @Id
@@ -30,13 +34,15 @@ public class Transaction {
     String devise;
     
     @Column(name = "Montant")
-    Double Montant;
+    BigDecimal Montant;
 
     @Column(name = "MotifPayment")
     String MotifPayment;
 
     @Column(name = "DateExecution")
     Date DateExecustion;
+
+    private String status;
 
     @ManyToOne
     @JoinColumn(name = "account_id")

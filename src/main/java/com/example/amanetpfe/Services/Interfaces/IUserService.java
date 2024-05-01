@@ -1,6 +1,7 @@
 package com.example.amanetpfe.Services.Interfaces;
 
 import com.example.amanetpfe.Entities.User;
+import com.example.amanetpfe.dto.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -32,4 +33,16 @@ public interface IUserService {
     void uploadProfilePicture(int idUser, MultipartFile file) throws IOException;
 
     User banUser(Integer idUser);
+    BankResponse balanceEnquiry(EnquiryRequest request);
+
+    String nameEnquiry(EnquiryRequest request);
+
+
+    BankResponse creationAccount(UserRequest userRequest);
+
+    BankResponse creditAccount(CreditDebitRequest request);
+
+    BankResponse debitAccount(CreditDebitRequest request);
+    BankResponse transfer(TransferRequest request);
+
 }

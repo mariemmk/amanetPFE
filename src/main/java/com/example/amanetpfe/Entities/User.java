@@ -2,6 +2,9 @@ package com.example.amanetpfe.Entities;
 
 
 import java.io.Serializable;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -12,17 +15,21 @@ import javax.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 
-import lombok.AccessLevel;
-import lombok.Data;
 import lombok.experimental.FieldDefaults;
 @Entity
 @Table(name = "User")
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class User implements Serializable, UserDetails {
@@ -32,17 +39,32 @@ public class User implements Serializable, UserDetails {
     @Column(name = "idUser")
     Integer idUser;
 
-    @Column(name = "name")
-    String name;
+    @Column(name = "firstname")
+    String firstName;
+    @Column(name = "familyName")
+    String familyName;
+
+    @Column(name = "otherName")
+    String otherName;
 
     @Column(name = "photo")
     String photo;
 
-    @Column(name = "familyName")
-    String familyName;
+
+    @Column(name = "Gender")
+    String gender;
 
     @Column(name = "phoneNumber")
-    Long phoneNumber ;
+    String phoneNumber ;
+
+    @Column(name = "alternativephoneNumber")
+    String alternativePhoneNumber ;
+
+    @Column(name = "stateOfOrigin")
+    String stateOfOrigin;
+
+    @Column(name = "status")
+    String status;
 
     @Column(name = "cin", unique = true)
     Long cin ;
@@ -67,10 +89,11 @@ public class User implements Serializable, UserDetails {
 
     @Column(name = "dateStartPremium")
     Date dateStartPremium;*/
-
+    @CreationTimestamp
     @Column(name = "createdAt")
     Date createdAt;
 
+    @UpdateTimestamp
     @Column(name = "modifiedAt")
     Date lastModifiedAt;
 
@@ -91,6 +114,12 @@ public class User implements Serializable, UserDetails {
     @JsonIgnore
     List<Reclamation> reclamations;*/
 
+    @Column(name = "accountNumber")
+    private String accountNumber;
+
+
+    @Column(name = "accountBalance")
+    private BigDecimal accountBalance;
 
     @Column(name = "role")
     @Enumerated(EnumType.STRING)

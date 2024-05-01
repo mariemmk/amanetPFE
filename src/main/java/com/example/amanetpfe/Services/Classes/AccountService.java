@@ -119,7 +119,7 @@ public class AccountService  implements IAccountService {
         if(u!= null ){
          StringBuilder identiteBancaireBuilder = new StringBuilder();
          identiteBancaireBuilder.append("Nom: ").append(u.getFamilyName()).append("\n");
-         identiteBancaireBuilder.append("Prénom: ").append(u.getName()).append("\n");
+         identiteBancaireBuilder.append("Prénom: ").append(u.getFirstName()).append("\n");
             identiteBancaireBuilder.append("Date de naissance: ").append(u.getBirthDate()).append("\n");
             identiteBancaireBuilder.append("Nature du Compte : ").append(u.getAccount().getAccountType()).append("\n");
             identiteBancaireBuilder.append("RIB : ").append(u.getAccount().getRIB()).append("\n");
