@@ -3,10 +3,7 @@ package com.example.amanetpfe.Controllers;
 import com.example.amanetpfe.Entities.ChangePasswordRequest;
 import com.example.amanetpfe.Entities.User;
 import com.example.amanetpfe.Services.Interfaces.IUserService;
-import com.example.amanetpfe.dto.BankResponse;
-import com.example.amanetpfe.dto.CreditDebitRequest;
-import com.example.amanetpfe.dto.EnquiryRequest;
-import com.example.amanetpfe.dto.UserRequest;
+import com.example.amanetpfe.dto.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -142,5 +139,10 @@ public class UserRestController {
     @PostMapping ("debit")
     public BankResponse debitAccount(@RequestBody CreditDebitRequest request){
         return  userService.debitAccount(request);
+    }
+
+    @PostMapping("transfer")
+    public BankResponse transfer(@RequestBody TransferRequest request){
+        return  userService.transfer(request);
     }
 }
