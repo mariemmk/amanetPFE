@@ -87,18 +87,18 @@ public class UserRestController {
         return userService.isVerificationCodeValid(email, verificationCode);
     }
 
-    @PostMapping("/verify-code-Compte")
+  /*  @PostMapping("/verify-code-Compte")
     public boolean verifyVerificationCodeverif(@RequestBody String email, @RequestParam String verificationCode) {
         return userService.isVerificationCodeValidVerif(email, verificationCode);
-    }
+    }*/
 
-    @PostMapping("/uploadProfilePicture/{idUser}")
+   /* @PostMapping("/uploadProfilePicture/{idUser}")
     public ResponseEntity<String> uploadProfilePicture(@PathVariable int idUser, @RequestParam("file") MultipartFile file) throws IOException {
         userService.uploadProfilePicture(idUser, file);
         return ResponseEntity.ok("Photo de profil téléchargée avec succès.");
-    }
+    }*/
 
-    @PostMapping("/bannedAccount/{id}")
+  /*  @PostMapping("/bannedAccount/{id}")
     public ResponseEntity<String> banUser(@PathVariable("id") Integer idUser) {
         User bannedUser = userService.banUser(idUser);
         if (bannedUser != null) {
@@ -106,7 +106,7 @@ public class UserRestController {
         } else {
             return ResponseEntity.badRequest().body("User not found");
         }
-    }
+    }*/
 
     @PostMapping("/verifyOldPassword/{id}")
     public boolean verifyOldPassword(@PathVariable("id") Integer idUser ,@RequestBody String oldPassword){
@@ -144,5 +144,15 @@ public class UserRestController {
     @PostMapping("transfer")
     public BankResponse transfer(@RequestBody TransferRequest request){
         return  userService.transfer(request);
+    }
+
+
+    @GetMapping("/identiteBancaire")
+    public String afficheIdentiteBancaire(@PathVariable("id") Integer userId) {
+        User user = new User(); // Créer un objet User avec l'ID fourni
+        user.setIdUser(userId);
+
+        // Appeler la méthode afficheIdentiteBancaire de AccountService
+        return userService.afficheIdentiteBancair(user);
     }
 }

@@ -7,24 +7,15 @@ import com.example.amanetpfe.Repositories.IUserRepository;
 import com.example.amanetpfe.Services.Interfaces.IUserService;
 
 
-
-import javax.persistence.EntityNotFoundException;
-
 import com.example.amanetpfe.dto.*;
 import com.example.amanetpfe.utils.AccountUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.util.FileCopyUtils;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -48,6 +39,93 @@ public class UserServiceImpl implements IUserService {
     public List<User> retrieveAllUsers() {
         return this.userRepository.findAll();
     }
+
+    @Override
+    public BankResponse creationAccount(UserRequest userRequest) {
+        /**
+         * Creating an account - saving new user into the db
+         * check if user already has an account
+         */
+
+
+
+        if (userRepository.existsByEmail(userRequest.getEmail())){
+            BankResponse response = BankResponse.builder()
+                    .responseCode(AccountUtils.ACCOUNT_EXISTS_CODE)
+                    .responseMessage(AccountUtils.ACCOUNT_EXIST_MESSAGE)
+                    .accountInfo(null)
+                    .build();
+            return response;
+        }
+
+
+        User newUser = User.builder()
+                .firstName(userRequest.getFirstName())
+                .familyName(userRequest.getFamilyName())
+                .otherName(userRequest.getOtherName())
+                .gender(userRequest.getGender())
+                .address(userRequest.getAddress())
+                .stateOfOrigin(userRequest.getStateOfOrigin())
+                .accountNumber(AccountUtils.generateAccountNumber())
+                .email(userRequest.getEmail())
+                .accountBalance(BigDecimal.ZERO)
+                .phoneNumber(userRequest.getPhoneNumber())
+                .alternativePhoneNumber(userRequest.getAlternativePhoneNumber())
+                .password(bCryptPasswordEncoder.encode(userRequest.getPassword()))
+                .status("ACTIVE")
+                .birthDate(userRequest.getBirthdate())
+                .cin(userRequest.getCIN())
+                .role(userRequest.getRole())
+                .RIB(AccountUtils.generateRIB())
+                .build();
+        User savedUser = userRepository.save(newUser);
+        EmailDetails emailDetails = EmailDetails.builder()
+                .recipient(savedUser.getEmail())
+                .subject("Account Creation")
+                .messageBody("Congratulation! your account has been successfully created " +" "
+                        +savedUser.getFirstName()+" "+savedUser.getFamilyName()
+                        +savedUser.getAccountNumber() +" "+savedUser.getRIB()+" "
+                        +savedUser.getAccountBalance()
+                )
+
+                .build();
+        emailSender.sendEmailAlert(emailDetails);
+        return  BankResponse.builder()
+                .responseCode(AccountUtils.ACCOUNT_CREATION_SUCCESS)
+                .responseMessage(AccountUtils.ACCOUNT_CREATION_MESSAGE)
+                .accountInfo(AccountInfo.builder()
+                        .accountBalance(savedUser.getAccountBalance())
+                        .accountNumber(savedUser.getAccountNumber())
+                        .CIN(savedUser.getCin())
+                        .RIB(savedUser.getRIB())
+                        .accountName(savedUser.getFirstName()+savedUser.getFamilyName()+savedUser.getOtherName())
+
+                        .build())
+                .build();
+    }
+
+
+
+
+    @Override
+    public String afficheIdentiteBancair(User user){
+        User u = this.userRepository.findById(user.getIdUser()).orElse(null);
+        String BIC= "CFCTTNTT";
+        if(u!= null ){
+            StringBuilder identiteBancaireBuilder = new StringBuilder();
+            identiteBancaireBuilder.append("Nom: ").append(u.getFamilyName()).append("\n");
+            identiteBancaireBuilder.append("Prénom: ").append(u.getFirstName()).append("\n");
+            identiteBancaireBuilder.append("Date de naissance: ").append(u.getBirthDate()).append("\n");
+            identiteBancaireBuilder.append("Nature du Compte : ").append(u.getAccount().getAccountType()).append("\n");
+            identiteBancaireBuilder.append("RIB : ").append(u.getAccount().getRIB()).append("\n");
+            identiteBancaireBuilder.append("Code BIC : ").append(BIC).append("\n");
+
+            return identiteBancaireBuilder.toString();
+        }else{
+            return "utilisateur  non trouve";
+        }
+    }
+
 
     public User addUser(User user) {
         boolean test = isMailExisit(user);
@@ -80,6 +158,8 @@ public class UserServiceImpl implements IUserService {
         }
         return null;
     }
+
+
 
 
     @Override
@@ -190,7 +270,7 @@ public class UserServiceImpl implements IUserService {
         }
     }
 
-    @Override
+   /* @Override
     public boolean isVerificationCodeValidVerif(String email, String verificationCode) {
         User user = userRepository.findUserByEmail(email);
         if (user == null) {
@@ -211,7 +291,7 @@ public class UserServiceImpl implements IUserService {
         return isValid;
 
     }
-
+*/
 
     public String generateNewCode() {
         int codeLength = 6;
@@ -228,7 +308,7 @@ public class UserServiceImpl implements IUserService {
         return code.toString();
     }
 
-    @Override
+  /*  @Override
     public void uploadProfilePicture(int idUser, MultipartFile file) throws IOException {
         // Vérifier si l'utilisateur existe
         User user = userRepository.findById(idUser).orElseThrow(() -> new EntityNotFoundException("Utilisateur non trouvé"));
@@ -256,9 +336,9 @@ public class UserServiceImpl implements IUserService {
 
         // Enregistrer les modifications dans la base de données
         userRepository.save(user);
-    }
+    }*/
 
-    @Override
+  /*  @Override
     public User banUser(Integer idUser) {
         Optional<User> userOptional = userRepository.findById(idUser);
         if (userOptional.isPresent()) {
@@ -269,7 +349,7 @@ public class UserServiceImpl implements IUserService {
             // Handle the case where the user with the given ID doesn't exist
             return null;
         }
-    }
+    }*/
 
     @Override
     public BankResponse balanceEnquiry(EnquiryRequest request) {
@@ -306,57 +386,6 @@ public class UserServiceImpl implements IUserService {
         return foundUser.getFirstName()+" "+foundUser.getFamilyName()+""+foundUser.getOtherName();
     }
 
-    @Override
-    public BankResponse creationAccount(UserRequest userRequest) {
-        /**
-         * Creating an account - saving new user into the db
-         * check if user already has an account
-         */
-        if (userRepository.existsByEmail(userRequest.getEmail())){
-            BankResponse response = BankResponse.builder()
-                    .responseCode(AccountUtils.ACCOUNT_EXISTS_CODE)
-                    .responseMessage(AccountUtils.ACCOUNT_EXIST_MESSAGE)
-                    .accountInfo(null)
-                    .build();
-            return response;
-        }
-        User newUser = User.builder()
-                .firstName(userRequest.getFirstName())
-                .familyName(userRequest.getFamilyName())
-                .otherName(userRequest.getOtherName())
-                .gender(userRequest.getGender())
-                .address(userRequest.getAddress())
-                .stateOfOrigin(userRequest.getStateOfOrigin())
-                .accountNumber(AccountUtils.generateAccountNumber())
-                .email(userRequest.getEmail())
-                .accountBalance(BigDecimal.ZERO)
-                .phoneNumber(userRequest.getPhoneNumber())
-                .alternativePhoneNumber(userRequest.getAlternativePhoneNumber())
-                .status("ACTIVE")
-                .build();
-        User savedUser = userRepository.save(newUser);
-        EmailDetails emailDetails = EmailDetails.builder()
-                .recipient(savedUser.getEmail())
-                .subject("Account Creation")
-                .messageBody("Congratulation! your account has been successfully created " +" "
-                                +savedUser.getFirstName()+" "+savedUser.getFamilyName()
-                        +savedUser.getAccountNumber() +" "
-                        +savedUser.getAccountBalance()+" "
-                        )
-
-                .build();
-        emailSender.sendEmailAlert(emailDetails);
-return  BankResponse.builder()
-        .responseCode(AccountUtils.ACCOUNT_CREATION_SUCCESS)
-        .responseMessage(AccountUtils.ACCOUNT_CREATION_MESSAGE)
-        .accountInfo(AccountInfo.builder()
-                .accountBalance(savedUser.getAccountBalance())
-                .accountNumber(savedUser.getAccountNumber())
-                .accountName(savedUser.getFirstName()+savedUser.getFamilyName()+savedUser.getOtherName())
-
-                .build())
-        .build();
-    }
 
     @Override
     public BankResponse creditAccount(CreditDebitRequest request) {

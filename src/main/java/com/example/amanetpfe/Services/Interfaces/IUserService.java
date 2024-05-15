@@ -10,6 +10,8 @@ import java.util.List;
 public interface IUserService {
     List<User> retrieveAllUsers();
 
+    String afficheIdentiteBancair(User user);
+
     User addUser(User user);
 
     User retrieveUser(Integer idUser);
@@ -24,15 +26,15 @@ public interface IUserService {
 
     public boolean changePassword(String email, String newPassword) ;
 
-    public boolean isVerificationCodeValidVerif(String email, String verificationCode) ;
+    //public boolean isVerificationCodeValidVerif(String email, String verificationCode) ;
 
     User updateUser(User user);
 
     public boolean checkOldPassword(String password, Integer idUser);
 
-    void uploadProfilePicture(int idUser, MultipartFile file) throws IOException;
+   // void uploadProfilePicture(int idUser, MultipartFile file) throws IOException;
 
-    User banUser(Integer idUser);
+   // User banUser(Integer idUser);
     BankResponse balanceEnquiry(EnquiryRequest request);
 
     String nameEnquiry(EnquiryRequest request);

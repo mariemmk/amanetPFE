@@ -29,5 +29,5 @@ public interface IAccountService {
 
     String generateRIB();
 
-    String afficheIdentiteBancair(User user);
+   // String afficheIdentiteBancair(User user);
 }

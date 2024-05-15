@@ -43,7 +43,6 @@ public class User implements Serializable, UserDetails {
     String firstName;
     @Column(name = "familyName")
     String familyName;
-
     @Column(name = "otherName")
     String otherName;
 
@@ -55,10 +54,10 @@ public class User implements Serializable, UserDetails {
     String gender;
 
     @Column(name = "phoneNumber")
-    String phoneNumber ;
+    Long phoneNumber ;
 
     @Column(name = "alternativephoneNumber")
-    String alternativePhoneNumber ;
+    Long alternativePhoneNumber ;
 
     @Column(name = "stateOfOrigin")
     String stateOfOrigin;
@@ -117,6 +116,8 @@ public class User implements Serializable, UserDetails {
     @Column(name = "accountNumber")
     private String accountNumber;
 
+    @Column(name = "RIB")
+    private String RIB;
 
     @Column(name = "accountBalance")
     private BigDecimal accountBalance;

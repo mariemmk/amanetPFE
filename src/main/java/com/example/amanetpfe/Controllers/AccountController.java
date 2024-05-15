@@ -68,14 +68,7 @@ public class AccountController {
     }
 
 
-    @GetMapping("/user/{id}/identiteBancaire")
-    public String afficheIdentiteBancaire(@PathVariable("id") Integer userId) {
-        User user = new User(); // Créer un objet User avec l'ID fourni
-        user.setIdUser(userId);
 
-        // Appeler la méthode afficheIdentiteBancaire de AccountService
-        return accountService.afficheIdentiteBancair(user);
-    }
 
 
 }

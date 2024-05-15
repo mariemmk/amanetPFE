@@ -105,14 +105,10 @@ public class AccountService  implements IAccountService {
         String rib = bic+ codeGuichet+numeroCompte+CleRIB;
         return rib;
 
-
-
-
-
     }
 
 
-    @Override
+ /*   @Override
     public String afficheIdentiteBancair(User user){
         User u = this.userRepository.findById(user.getIdUser()).orElse(null);
         String BIC= "CFCTTNTT";
@@ -129,5 +125,6 @@ public class AccountService  implements IAccountService {
         }else{
             return "utilisateur  non trouve";
         }
-    }
+    }*/
+
     }

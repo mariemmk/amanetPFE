@@ -1,6 +1,7 @@
 package com.example.amanetpfe.utils;
 
 import java.time.Year;
+import java.util.Random;
 
 public class AccountUtils {
 
@@ -19,6 +20,24 @@ public class AccountUtils {
         return accountNumber.append(year).append(randNumber).toString();
 
     }
+
+
+    //methode qui genere le RIB
+    public  static String generateRIB(){
+        //CODE BIC DE LA BANQUE
+        String bic = "07";
+        String codeGuichet= "405";
+        //generer le numero de compte
+        String numeroCompte = generateAccountNumber();
+        //genere aleatoirement le rest de RIB
+
+        Random random = new Random();
+        String CleRIB = String.format("%02d",random.nextInt(100)); //generer un cle RIB a  2 chiffres
+        String rib = bic+ codeGuichet+numeroCompte+CleRIB;
+        return rib;
+
+    }
+
 
 
     public static final String ACCOUNT_EXISTS_CODE = "001";
