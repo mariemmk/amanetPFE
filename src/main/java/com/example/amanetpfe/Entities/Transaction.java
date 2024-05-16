@@ -44,10 +44,6 @@ public class Transaction {
 
     private String status;
 
-    @ManyToOne
-    @JoinColumn(name = "account_id")
-    private Account account;
-    
 
 
 

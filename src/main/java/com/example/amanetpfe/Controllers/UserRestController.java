@@ -39,15 +39,7 @@ public class UserRestController {
         return result;
     }
 
-    @PostMapping("/add")
-    @Operation(description = "add new user")
-    ResponseEntity<User> addUSer(@RequestBody User user){
-        User result = userService.addUser(user);
-        if (result != null) {
-            return new ResponseEntity<>(result, HttpStatus.CREATED);
-        }
-        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-    }
+
 
     @PutMapping("/edit/{id}")
     @Operation(description = "edit one user")

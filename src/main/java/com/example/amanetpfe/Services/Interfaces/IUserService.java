@@ -12,7 +12,7 @@ public interface IUserService {
 
     String afficheIdentiteBancair(User user);
 
-    User addUser(User user);
+   // User addUser(User user);
 
     User retrieveUser(Integer idUser);
 

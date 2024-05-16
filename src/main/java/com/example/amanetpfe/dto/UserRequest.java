@@ -1,6 +1,7 @@
 package com.example.amanetpfe.dto;
 
 import com.example.amanetpfe.Entities.Role;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,6 +13,7 @@ import java.util.Date;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class UserRequest {
     private String firstName;
     private String familyName;
@@ -23,10 +25,12 @@ public class UserRequest {
     private Long phoneNumber;
     private Long alternativePhoneNumber;
     private String Password;
-    private Date birthdate;
+    private Date birthDate;
+    private String accountType;
     private Long CIN;
     private Role role;
     private String RIB;
+
 
 
 

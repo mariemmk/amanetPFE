@@ -1,6 +1,5 @@
 package com.example.amanetpfe.Services.Classes;
 
-import com.example.amanetpfe.Entities.Account;
 import com.example.amanetpfe.Entities.Role;
 import com.example.amanetpfe.Entities.User;
 import com.example.amanetpfe.Repositories.IUserRepository;
@@ -26,8 +25,7 @@ public class UserServiceImpl implements IUserService {
     @Autowired
     private IUserRepository userRepository ;
 
-    @Autowired
-    private AccountService accountService;
+
 
     @Autowired
     private PasswordEncoder bCryptPasswordEncoder;
@@ -69,14 +67,16 @@ public class UserServiceImpl implements IUserService {
                 .accountNumber(AccountUtils.generateAccountNumber())
                 .email(userRequest.getEmail())
                 .accountBalance(BigDecimal.ZERO)
+                .accountType(userRequest.getAccountType())
                 .phoneNumber(userRequest.getPhoneNumber())
                 .alternativePhoneNumber(userRequest.getAlternativePhoneNumber())
                 .password(bCryptPasswordEncoder.encode(userRequest.getPassword()))
                 .status("ACTIVE")
-                .birthDate(userRequest.getBirthdate())
+                .birthDate(userRequest.getBirthDate())
                 .cin(userRequest.getCIN())
                 .role(userRequest.getRole())
                 .RIB(AccountUtils.generateRIB())
+                
                 .build();
         User savedUser = userRepository.save(newUser);
         EmailDetails emailDetails = EmailDetails.builder()
@@ -116,8 +116,8 @@ public class UserServiceImpl implements IUserService {
             identiteBancaireBuilder.append("Nom: ").append(u.getFamilyName()).append("\n");
             identiteBancaireBuilder.append("Prénom: ").append(u.getFirstName()).append("\n");
             identiteBancaireBuilder.append("Date de naissance: ").append(u.getBirthDate()).append("\n");
-            identiteBancaireBuilder.append("Nature du Compte : ").append(u.getAccount().getAccountType()).append("\n");
-            identiteBancaireBuilder.append("RIB : ").append(u.getAccount().getRIB()).append("\n");
+            identiteBancaireBuilder.append("Nature du Compte : ").append(u.getAccountType()).append("\n");
+            identiteBancaireBuilder.append("RIB : ").append(u.getRIB()).append("\n");
             identiteBancaireBuilder.append("Code BIC : ").append(BIC).append("\n");
 
             return identiteBancaireBuilder.toString();
@@ -127,7 +127,7 @@ public class UserServiceImpl implements IUserService {
     }
 
 
-    public User addUser(User user) {
+    /*public User addUser(User user) {
         boolean test = isMailExisit(user);
         if (!isMailExisit(user)) {
             // Encoder le mot de passe
@@ -159,7 +159,7 @@ public class UserServiceImpl implements IUserService {
         return null;
     }
 
-
+*/
 
 
     @Override

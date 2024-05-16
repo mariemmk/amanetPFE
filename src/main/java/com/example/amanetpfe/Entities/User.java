@@ -77,11 +77,13 @@ public class User implements Serializable, UserDetails {
     @Column(name = "birthDate")
     Date birthDate;
 
-    @Column(name = "isVerified")
-    Boolean isVerified;
 
-    @Column(name = "isBanned")
-    Boolean isBanned;
+
+   /* @Column(name = "isVerified")
+    Boolean isVerified;*/
+
+   /* @Column(name = "isBanned")
+    Boolean isBanned;*/
 
   /*  @Column(name = "isPremium")
     Boolean isPremium;
@@ -122,6 +124,9 @@ public class User implements Serializable, UserDetails {
     @Column(name = "accountBalance")
     private BigDecimal accountBalance;
 
+    @Column(name = "accountType")
+     String accountType;
+
     @Column(name = "role")
     @Enumerated(EnumType.STRING)
     Role role;
@@ -130,9 +135,6 @@ public class User implements Serializable, UserDetails {
         return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + this.role.name()));
     }
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
-    @JsonManagedReference // Indique que c'est le côté propriétaire de la relation
-    private Account account;
 
     @Override
     public String getUsername() {
@@ -149,6 +151,9 @@ public class User implements Serializable, UserDetails {
         return true;
 
     }
+
+
+
 
     @Override
     public boolean isCredentialsNonExpired() {
