@@ -1,6 +1,5 @@
 package com.example.amanetpfe.dto;
 
-import com.example.amanetpfe.Entities.TypeTransaction;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,25 +14,19 @@ import java.util.Date;
 @AllArgsConstructor
 public class TransactionDto {
     @Column(name = "CompteADebite")
-    Long CompteADebite;
+    String accountNumber;
 
-    @Column(name = "CompteACredite")
-    Long CompteACredite;
+
 
     @Column(name = "TypeTransaction")
-    TypeTransaction typeTransaction;
+    String typeTransaction;
 
     @Column(name = "devise")
     String devise;
 
     @Column(name = "Montant")
-    BigDecimal Montant;
+    BigDecimal amount;
 
-    @Column(name = "MotifPayment")
-    String MotifPayment;
-
-    @Column(name = "DateExecution")
-    Date DateExecustion;
 
     private String status;
 

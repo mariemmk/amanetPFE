@@ -26,7 +26,8 @@ public class UserServiceImpl implements IUserService {
     private IUserRepository userRepository ;
 
 
-
+@Autowired
+private TransactionService transactionService;
     @Autowired
     private PasswordEncoder bCryptPasswordEncoder;
 
@@ -96,7 +97,7 @@ public class UserServiceImpl implements IUserService {
                 .accountInfo(AccountInfo.builder()
                         .accountBalance(savedUser.getAccountBalance())
                         .accountNumber(savedUser.getAccountNumber())
-                        .CIN(savedUser.getCin())
+                        .cin(savedUser.getCin())
                         .RIB(savedUser.getRIB())
                         .accountName(savedUser.getFirstName()+savedUser.getFamilyName()+savedUser.getOtherName())
 
@@ -405,13 +406,27 @@ public class UserServiceImpl implements IUserService {
          userToCredit.setAccountBalance(userToCredit.getAccountBalance().add(request.getAmount()));
          userRepository.save(userToCredit);
 
+
+         /// save transaction
+        TransactionDto transactionDto = TransactionDto.builder()
+                .accountNumber(userToCredit.getAccountNumber())
+                .typeTransaction("CREDIT")
+                .amount(request.getAmount())
+                .devise("TND")
+                .build();
+
+        transactionService.saveTransaction(transactionDto);
+
+
         return  BankResponse.builder()
                 .responseMessage(AccountUtils.ACCOUNT_CREDITED_SUCCESS_MESSAGE)
                 .responseCode(AccountUtils.ACCOUNT_CREDITED_SUCCESS)
                 .accountInfo(AccountInfo.builder()
-                        .accountName(userToCredit.getFirstName()+" "+userToCredit.getFamilyName()+" "+userToCredit.getOtherName())
+                        .accountName(userToCredit.getFirstName()+" "+userToCredit.getFamilyName())
                         .accountBalance(userToCredit.getAccountBalance())
                         .accountNumber(userToCredit.getAccountNumber())
+                        .RIB(userToCredit.getRIB())
+                        .cin(userToCredit.getCin())
                         .build()
                 )
                 .build();
@@ -443,9 +458,20 @@ public class UserServiceImpl implements IUserService {
                     .accountInfo(null).
                     build();
         }
+
+
         else {
             userToDebit.setAccountBalance(userToDebit.getAccountBalance().subtract(request.getAmount()));
             userRepository.save(userToDebit);
+
+            TransactionDto transactionDto = TransactionDto.builder()
+                    .accountNumber(userToDebit.getAccountNumber())
+                    .typeTransaction("DEBIT")
+                    .amount(request.getAmount())
+                    .devise("TND")
+                    .build();
+
+            transactionService.saveTransaction(transactionDto);
             return  BankResponse.builder()
                     .responseCode(AccountUtils.ACCOUNT_DEBITED_SUCCESS_CODE)
                     .responseCode(AccountUtils.ACCOUNT_DEBITED_SUCCESS_MESSAGE)
@@ -453,6 +479,8 @@ public class UserServiceImpl implements IUserService {
                             .accountNumber(request.getAccountNumber())
                             .accountName(userToDebit.getFirstName()+" "+userToDebit.getFamilyName())
                             .accountBalance(userToDebit.getAccountBalance())
+                            .cin(userToDebit.getCin())
+                            .RIB(userToDebit.getRIB())
                             .build())
                     .build();
         }
@@ -497,6 +525,7 @@ public class UserServiceImpl implements IUserService {
                 .build();
         emailSender.sendEmailAlert(debitAlert);
 
+
         User destinationAccountUser = userRepository.findByAccountNumber(request.getDestinationAccountNumber());
         destinationAccountUser.setAccountBalance(destinationAccountUser.getAccountBalance().add(request.getAmount()));
         //String recipientUserName = destinationAccountUser.getFirstName()+" "+destinationAccountUser.getFamilyName();
@@ -507,6 +536,16 @@ public class UserServiceImpl implements IUserService {
                 .messageBody("the sum of  " +" " +request.getAmount()+"has been sent to your account from  "+ " " +sourceUserName+ " your current balancce is "+sourceAccountUser.getAccountBalance())
                 .build();
         emailSender.sendEmailAlert(creditAlert);
+
+
+        TransactionDto transactionDto = TransactionDto.builder()
+                .accountNumber(destinationAccountUser.getAccountNumber())
+                .typeTransaction("TRANSFER")
+                .amount(request.getAmount())
+                .devise("TND")
+                .build();
+
+        transactionService.saveTransaction(transactionDto);
         return BankResponse.builder()
                 .responseCode(AccountUtils.TRANSFER_SUCCESSFUL_CODE)
                 .responseCode(AccountUtils.TRANSFER_SUCCESSFUL_MESSAGE)

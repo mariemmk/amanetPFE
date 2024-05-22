@@ -1,50 +1,47 @@
 package com.example.amanetpfe.Entities;
 
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
-import java.util.Date;
+import java.sql.Timestamp;
 
 @Entity
 @Getter
 @Setter
-@Table(name = "Transaction")
+@Table(name = "transaction")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-
-
+@Data
 public class Transaction {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "idTransaction")
-    Integer idTransaction;
+    @Column(name = "id_transaction")
+    private Long transactionId;
 
-    @Column(name = "CompteADebite")
-    Long CompteADebite;
+    @Column(name = "account_number")
+    private String accountNumber;
 
-    @Column(name = "CompteACredite")
-    Long CompteACredite;
+    @Column(name = "type_transaction")
+    private String typeTransaction;
 
-    @Column(name = "TypeTransaction")
-    TypeTransaction typeTransaction;
-    
     @Column(name = "devise")
-    String devise;
-    
-    @Column(name = "Montant")
-    BigDecimal Montant;
+    private String devise;
 
-    @Column(name = "MotifPayment")
-    String MotifPayment;
+    @Column(name = "montant")
+    private BigDecimal amount;
 
-    @Column(name = "DateExecution")
-    Date DateExecustion;
-
+    @Column(name = "status")
     private String status;
 
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private Timestamp createdAt;
 
-
-
+    @UpdateTimestamp
+    @Column(name = "modified_at")
+    private Timestamp modifiedAt;
 }
