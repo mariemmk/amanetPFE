@@ -1,6 +1,6 @@
 package com.example.amanetpfe.Services.Classes;
 
-import com.example.amanetpfe.Entities.ImageTextDto;
+import com.example.amanetpfe.dto.ImageTextDto;
 
 import com.example.amanetpfe.utils.TesseractOcrUtil;
 import lombok.AccessLevel;

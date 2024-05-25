@@ -1,4 +1,4 @@
-package com.example.amanetpfe.Entities;
+package com.example.amanetpfe.dto;
 
 import lombok.*;
 

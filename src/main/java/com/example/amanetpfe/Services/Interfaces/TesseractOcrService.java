@@ -1,6 +1,6 @@
 package com.example.amanetpfe.Services.Interfaces;
 
-import com.example.amanetpfe.Entities.ImageTextDto;
+import com.example.amanetpfe.dto.ImageTextDto;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;

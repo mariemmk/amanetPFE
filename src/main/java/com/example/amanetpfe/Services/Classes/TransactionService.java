@@ -13,6 +13,8 @@ public class TransactionService implements ITransactionService {
     @Autowired
     TransactionRepository transactionRepository;
 
+
+
     @Override
     public void saveTransaction(TransactionDto transactionDto) {
 
@@ -43,20 +45,33 @@ public class TransactionService implements ITransactionService {
         int months = duration * 12;
         double monthlyPayment = (amount * monthlyRate) / (1 - Math.pow(1 + monthlyRate, -months));
 
-        return monthlyPayment;
+        return Math.round(monthlyPayment * 100.0) / 100.0;
     }
 
     @Override
-    public double Auto_invest(double amount, int duration) {
-
+    public CreditDetails Auto_invest(double carPrice, int duration, int horsepower) {
         double rate = 12;
+
+        // Calculer le montant maximal du crédit en fonction de la puissance de la voiture
+        double maxCreditAmount;
+        if (horsepower == 4) {
+            maxCreditAmount = carPrice * 0.80;
+        } else if (horsepower >= 5) {
+            maxCreditAmount = carPrice * 0.60;
+        } else {
+            throw new IllegalArgumentException("Puissance de voiture non valide. La puissance doit être 4 ou plus.");
+        }
 
         double monthlyRate = (rate / 100) / 12;
         int months = duration * 12;
-        double monthlyPayment = (amount * monthlyRate) / (1 - Math.pow(1 + monthlyRate, -months));
+        double monthlyPayment = (maxCreditAmount * monthlyRate) / (1 - Math.pow(1 + monthlyRate, -months));
 
-        return monthlyPayment;
+        monthlyPayment = Math.round(monthlyPayment * 100.0) / 100.0;
+        maxCreditAmount = Math.round(maxCreditAmount * 100.0) / 100.0;
+
+        return new CreditDetails(maxCreditAmount, monthlyPayment);
     }
+
 
 
     @Override
@@ -68,7 +83,7 @@ public class TransactionService implements ITransactionService {
         int months = duration * 12;
         double monthlyPayment = (amount * monthlyRate) / (1 - Math.pow(1 + monthlyRate, -months));
 
-        return monthlyPayment;
+        return Math.round(monthlyPayment * 100.0) / 100.0;
     }
 
     @Override
@@ -80,7 +95,7 @@ public class TransactionService implements ITransactionService {
         int months = duration * 12;
         double monthlyPayment = (amount * monthlyRate) / (1 - Math.pow(1 + monthlyRate, -months));
 
-        return monthlyPayment;
+        return Math.round(monthlyPayment * 100.0) / 100.0;
     }
 
 }

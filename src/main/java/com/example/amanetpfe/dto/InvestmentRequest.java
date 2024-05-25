@@ -8,7 +8,9 @@ import java.time.LocalDate;
 @Setter
 public class InvestmentRequest {
     private double amount;
+
     private LocalDate issueDate;
+
     private LocalDate maturityDate;
 
 }

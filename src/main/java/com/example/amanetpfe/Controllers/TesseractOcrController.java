@@ -1,6 +1,6 @@
 package com.example.amanetpfe.Controllers;
 
-import com.example.amanetpfe.Entities.ImageTextDto;
+import com.example.amanetpfe.dto.ImageTextDto;
 import com.example.amanetpfe.Services.Classes.TesseractOcrService;
 
 import io.swagger.v3.oas.annotations.Operation;

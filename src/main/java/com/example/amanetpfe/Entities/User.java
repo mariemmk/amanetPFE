@@ -165,4 +165,8 @@ public class User implements Serializable, UserDetails {
         return true;
     }
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    List<Credit> credits;
+
+
 }

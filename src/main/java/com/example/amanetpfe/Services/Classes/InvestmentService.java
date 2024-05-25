@@ -3,6 +3,8 @@ package com.example.amanetpfe.Services.Classes;
 import com.example.amanetpfe.dto.InvestmentResponse;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 
@@ -12,12 +14,21 @@ public class InvestmentService {
     private static final double TAX_RATE = 0.20; // 20% tax rate for example
 
     public double calculateGrossReturn(double amount, double rate, long days) {
-        return amount * rate * days / 365;
+        double grossReturn = amount * rate * days / 365;
+        return roundToTwoDecimals(grossReturn);
     }
 
     public double calculateNetReturn(double grossReturn) {
-        return grossReturn * (1 - TAX_RATE);
+        double netReturn = grossReturn * (1 - TAX_RATE);
+        return roundToTwoDecimals(netReturn);
     }
+
+    private double roundToTwoDecimals(double value) {
+        BigDecimal bd = new BigDecimal(value);
+        bd = bd.setScale(2, RoundingMode.HALF_UP);
+        return bd.doubleValue();
+    }
+
 
     public InvestmentResponse simulateInvestment(double amount, LocalDate issueDate, LocalDate maturityDate) {
 
@@ -25,11 +36,13 @@ public class InvestmentService {
 
         double grossReturnAdvance = calculateGrossReturn(amount, INTEREST_RATE, periodDays);
         double netReturnAdvance = calculateNetReturn(grossReturnAdvance);
-        double sourceTaxAdvance = grossReturnAdvance - netReturnAdvance;
+
 
         double grossReturnTerm = calculateGrossReturn(amount, INTEREST_RATE, periodDays);
         double netReturnTerm = calculateNetReturn(grossReturnTerm);
-        double sourceTaxTerm = grossReturnTerm - netReturnTerm;
+
+        double sourceTaxAdvance = roundToTwoDecimals(grossReturnAdvance - netReturnAdvance);
+        double sourceTaxTerm = roundToTwoDecimals(grossReturnTerm - netReturnTerm);
 
         InvestmentResponse response = new InvestmentResponse();
         response.setInitialAmount(amount);
