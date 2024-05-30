@@ -137,12 +137,15 @@ public class UserRestController {
     }
 
 
-    @GetMapping("/identiteBancaire")
-    public String afficheIdentiteBancaire(@PathVariable("id") Integer userId) {
-        User user = new User(); // Créer un objet User avec l'ID fourni
-        user.setIdUser(userId);
+    @GetMapping("/identiteBancaire/{idUser}")
+    public ResponseEntity<String> afficheIdentiteBancaire(@PathVariable("idUser") Integer idUser) {
+        User user = new User();
+        user.setIdUser(idUser);
 
-        // Appeler la méthode afficheIdentiteBancaire de AccountService
-        return userService.afficheIdentiteBancair(user);
+        String userBankDetails = userService.afficheIdentiteBancair(user);
+        if (userBankDetails.equals("utilisateur non trouve")) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(userBankDetails, HttpStatus.OK);
     }
 }

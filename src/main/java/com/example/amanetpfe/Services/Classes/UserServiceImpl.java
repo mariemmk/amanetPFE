@@ -116,6 +116,7 @@ private TransactionService transactionService;
             StringBuilder identiteBancaireBuilder = new StringBuilder();
             identiteBancaireBuilder.append("Nom: ").append(u.getFamilyName()).append("\n");
             identiteBancaireBuilder.append("Prénom: ").append(u.getFirstName()).append("\n");
+            identiteBancaireBuilder.append("Solde: ").append(u.getAccountBalance()).append("\n");
             identiteBancaireBuilder.append("Date de naissance: ").append(u.getBirthDate()).append("\n");
             identiteBancaireBuilder.append("Nature du Compte : ").append(u.getAccountType()).append("\n");
             identiteBancaireBuilder.append("RIB : ").append(u.getRIB()).append("\n");
