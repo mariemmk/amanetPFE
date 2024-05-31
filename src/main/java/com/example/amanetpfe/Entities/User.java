@@ -118,8 +118,8 @@ public class User implements Serializable, UserDetails {
     @Column(name = "accountNumber")
     private String accountNumber;
 
-    @Column(name = "RIB")
-    private String RIB;
+    @Column(name = "rib")
+    private String rib;
 
     @Column(name = "accountBalance")
     private BigDecimal accountBalance;

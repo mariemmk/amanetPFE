@@ -23,7 +23,8 @@ public class CreditRequestService implements ICreditRequestService {
     private IUserRepository userRepository;
 
     @Override
-    public Credit createCreditRequest(Credit creditRequest) {
+    public Credit createCreditRequest(Credit creditRequest ) {
+
         creditRequest.setDate(LocalDate.now());
         creditRequest.setStatus("PENDING");
         return creditRequestRepository.save(creditRequest);

@@ -76,7 +76,7 @@ private TransactionService transactionService;
                 .birthDate(userRequest.getBirthDate())
                 .cin(userRequest.getCIN())
                 .role(userRequest.getRole())
-                .RIB(AccountUtils.generateRIB())
+                .rib(AccountUtils.generateRIB())
                 
                 .build();
         User savedUser = userRepository.save(newUser);
@@ -85,7 +85,7 @@ private TransactionService transactionService;
                 .subject("Account Creation")
                 .messageBody("Congratulation! your account has been successfully created " +" "
                         +savedUser.getFirstName()+" "+savedUser.getFamilyName()
-                        +savedUser.getAccountNumber() +" "+savedUser.getRIB()+" "
+                        +savedUser.getAccountNumber() +" "+savedUser.getRib()+" "
                         +savedUser.getAccountBalance()
                 )
 
@@ -98,7 +98,7 @@ private TransactionService transactionService;
                         .accountBalance(savedUser.getAccountBalance())
                         .accountNumber(savedUser.getAccountNumber())
                         .cin(savedUser.getCin())
-                        .RIB(savedUser.getRIB())
+                        .RIB(savedUser.getRib())
                         .accountName(savedUser.getFirstName()+savedUser.getFamilyName()+savedUser.getOtherName())
 
                         .build())
@@ -111,7 +111,7 @@ private TransactionService transactionService;
     @Override
     public String afficheIdentiteBancair(User user){
         User u = this.userRepository.findById(user.getIdUser()).orElse(null);
-        String BIC= "CFCTTNTT";
+        String bic= "CFCTTNTT";
         if(u!= null ){
             StringBuilder identiteBancaireBuilder = new StringBuilder();
             identiteBancaireBuilder.append("Nom: ").append(u.getFamilyName()).append("\n");
@@ -119,8 +119,8 @@ private TransactionService transactionService;
             identiteBancaireBuilder.append("Solde: ").append(u.getAccountBalance()).append("\n");
             identiteBancaireBuilder.append("Date de naissance: ").append(u.getBirthDate()).append("\n");
             identiteBancaireBuilder.append("Nature du Compte : ").append(u.getAccountType()).append("\n");
-            identiteBancaireBuilder.append("RIB : ").append(u.getRIB()).append("\n");
-            identiteBancaireBuilder.append("Code BIC : ").append(BIC).append("\n");
+            identiteBancaireBuilder.append("RIB : ").append(u.getRib()).append("\n");
+            identiteBancaireBuilder.append("Code BIC : ").append(bic).append("\n");
 
             return identiteBancaireBuilder.toString();
         }else{
@@ -426,7 +426,7 @@ private TransactionService transactionService;
                         .accountName(userToCredit.getFirstName()+" "+userToCredit.getFamilyName())
                         .accountBalance(userToCredit.getAccountBalance())
                         .accountNumber(userToCredit.getAccountNumber())
-                        .RIB(userToCredit.getRIB())
+                        .RIB(userToCredit.getRib())
                         .cin(userToCredit.getCin())
                         .build()
                 )
@@ -481,7 +481,7 @@ private TransactionService transactionService;
                             .accountName(userToDebit.getFirstName()+" "+userToDebit.getFamilyName())
                             .accountBalance(userToDebit.getAccountBalance())
                             .cin(userToDebit.getCin())
-                            .RIB(userToDebit.getRIB())
+                            .RIB(userToDebit.getRib())
                             .build())
                     .build();
         }
@@ -553,6 +553,8 @@ private TransactionService transactionService;
                 .build();
 
     }
+
+
 
     public boolean checkOldPassword(String password, Integer idUser) {
         User user = userRepository.findById(idUser).orElse(null);
