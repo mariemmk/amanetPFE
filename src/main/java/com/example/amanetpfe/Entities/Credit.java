@@ -1,8 +1,10 @@
 package com.example.amanetpfe.Entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.*;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Getter
@@ -30,7 +32,7 @@ public class Credit {
     private String clientOtherIncomeSources;
     private double clientOtherIncomeAmount;
 
-    private double creditAmount;
+    private BigDecimal creditAmount;
     private String creditPurpose;
     private String repaymentFrequency;
     private int durationYears;
@@ -42,6 +44,7 @@ public class Credit {
     private String status; // PENDING, APPROVED, REJECTED
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "idUser")
+    @JsonBackReference
     private User user;
 }

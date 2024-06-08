@@ -9,11 +9,13 @@ import java.util.List;
 public interface IReclamationService {
     List<Reclamation> allReclamations() ;
 
-    Reclamation addReclamtion(Reclamation reclamation);
+    Reclamation addReclamtion(Reclamation reclamation );
 
     Reclamation retrieveReclamation(Integer idReclamation);
 
     void removeReclamation(Integer idReclamtion);
 
     Reclamation updateReclamation(Reclamation reclamation);
+
+    Reclamation createReclamation(Reclamation reclamation, Integer idUser);
 }

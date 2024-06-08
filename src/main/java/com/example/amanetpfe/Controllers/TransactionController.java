@@ -31,6 +31,11 @@ public class TransactionController {
 
     }
 
+
+    @GetMapping("/transactions")
+    public List<Transaction> getAllTransactions() {
+        return transactionService.retrieveAllTransactions();
+    }
     @GetMapping("preslaire_amenagement")
     public LoanDetailsResponse simulatePreslaireAmenagement(@RequestParam double amount , @RequestParam String loanType, @RequestParam  int duration ) {
         double monthlyPayment = transactionService.Preslaire_amenagement( amount , duration , loanType);

@@ -45,9 +45,9 @@ public class UserRestController {
         return userService.updateUser(user);
     }
 
-    @DeleteMapping("/remove/{id}")
+    @DeleteMapping("/remove/{idUser}")
     @Operation(description = "remove user by id")
-    ResponseEntity<User> removeUser(@PathVariable("id") Integer idUser){
+    ResponseEntity<User> removeUser(@PathVariable("idUser") Integer idUser){
         userService.removeUser(idUser);
         return new ResponseEntity<>(HttpStatus.OK);
     }

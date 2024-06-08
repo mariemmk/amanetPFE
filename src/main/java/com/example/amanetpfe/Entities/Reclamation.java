@@ -5,6 +5,7 @@ import javax.persistence.*;
 
 import lombok.*;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 @Entity
@@ -17,8 +18,7 @@ import java.util.Date;
 public class Reclamation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ReclamatonId")
-    Integer ReclamatonId ;
+    private Integer reclamationId;
 
     @Column(name = "Contenu")
     private String Contenu;
@@ -27,8 +27,8 @@ public class Reclamation {
     private String TypeReclamation;
 
     @Column(name = "date")
-    @Temporal(TemporalType.DATE)
-    private Date date;
+
+    private LocalDate date;
 
 
 

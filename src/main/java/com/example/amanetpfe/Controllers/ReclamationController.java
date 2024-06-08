@@ -55,4 +55,9 @@ public class ReclamationController {
         reclamationService.removeReclamation(idReclamation);
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    @PostMapping("/create/{idUser}")
+    public Reclamation createReclamation(@RequestBody Reclamation reclamation, @PathVariable Integer idUser) {
+        return reclamationService.createReclamation(reclamation, idUser);
+    }
 }

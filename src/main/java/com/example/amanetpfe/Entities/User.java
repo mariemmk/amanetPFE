@@ -166,6 +166,7 @@ public class User implements Serializable, UserDetails {
     }
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference
     List<Credit> credits;
 
 

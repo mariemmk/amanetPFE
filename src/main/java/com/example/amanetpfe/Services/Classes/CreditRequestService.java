@@ -22,11 +22,13 @@ public class CreditRequestService implements ICreditRequestService {
     @Autowired
     private IUserRepository userRepository;
 
-    @Override
-    public Credit createCreditRequest(Credit creditRequest ) {
 
+    @Override
+    public Credit createCreditRequest(Credit creditRequest, Integer idUser) {
+        User user = userRepository.findById(idUser).orElseThrow(() -> new RuntimeException("User not found"));
         creditRequest.setDate(LocalDate.now());
         creditRequest.setStatus("PENDING");
+        creditRequest.setUser(user);
         return creditRequestRepository.save(creditRequest);
     }
     @Override
@@ -39,23 +41,34 @@ public class CreditRequestService implements ICreditRequestService {
     }
 
 
-    @Override
-    public Credit approveCredit(Long creditId) {
-        Credit credit = creditRequestRepository.findById(creditId)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid credit ID"));
-
-        if (!"PENDING".equals(credit.getStatus())) {
-            throw new IllegalStateException("Credit is not in a pending state");
-        }
-
-        credit.setStatus("APPROVED");
+    public Credit approveCredit(Long id) {
+        Credit credit = creditRequestRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid credit ID: " + id));
 
         User user = credit.getUser();
-        user.setAccountBalance(user.getAccountBalance().add(BigDecimal.valueOf(credit.getCreditAmount())));
-        userRepository.save(user);
-        creditRequestRepository.save(credit);
 
-        return credit;
+        if (user == null) {
+            throw new IllegalStateException("Credit has no associated user");
+        }
+
+        BigDecimal accountBalance = user.getAccountBalance();
+
+        if (accountBalance == null) {
+            accountBalance = BigDecimal.ZERO; // Default to zero if null
+        }
+
+        // Perform the approval logic, e.g., updating user account balance
+        BigDecimal updatedBalance = accountBalance.add(credit.getCreditAmount());
+        user.setAccountBalance(updatedBalance);
+
+        // Save the updated user
+        userRepository.save(user);
+
+        // Update the credit status or other fields as necessary
+        credit.setStatus("Approved");
+
+        // Save the updated credit
+        return creditRequestRepository.save(credit);
     }
     @Override
     public Credit rejectCreditRequest(Long id) {
