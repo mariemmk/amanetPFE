@@ -1,5 +1,6 @@
 package com.example.amanetpfe.Entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.*;
 
 import javax.persistence.*;
@@ -23,7 +24,8 @@ public class Expense {
     private  String Description;
     private LocalDate date;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id_user")
+    @JsonBackReference
     private User user;
-
 }

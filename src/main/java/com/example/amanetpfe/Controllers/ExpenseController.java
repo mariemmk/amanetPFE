@@ -11,7 +11,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-@Controller
+import java.math.BigDecimal;
+import java.util.Map;
+
+@RestController
+
 @RequestMapping("/expense")
 public class ExpenseController {
     @Autowired
@@ -25,5 +29,12 @@ public class ExpenseController {
         }
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
+
+
+    @GetMapping("/ideal/{idUser}")
+    public Map<String, BigDecimal> getIdealExpenses(@PathVariable Integer idUser) {
+        return expenseService.calculateIdealExpenses(idUser);
+    }
+
 
 }

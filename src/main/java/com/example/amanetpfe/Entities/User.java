@@ -54,10 +54,10 @@ public class User implements Serializable, UserDetails {
     String gender;
 
     @Column(name = "phoneNumber")
-    Long phoneNumber ;
+    Long phoneNumber;
 
     @Column(name = "alternativephoneNumber")
-    Long alternativePhoneNumber ;
+    Long alternativePhoneNumber;
 
     @Column(name = "stateOfOrigin")
     String stateOfOrigin;
@@ -66,7 +66,7 @@ public class User implements Serializable, UserDetails {
     String status;
 
     @Column(name = "cin", unique = true)
-    Long cin ;
+    Long cin;
 
     @Column(name = "password")
     String password;
@@ -85,11 +85,11 @@ public class User implements Serializable, UserDetails {
    /* @Column(name = "isBanned")
     Boolean isBanned;*/
 
-  /*  @Column(name = "isPremium")
-    Boolean isPremium;
+    /*  @Column(name = "isPremium")
+      Boolean isPremium;
 
-    @Column(name = "dateStartPremium")
-    Date dateStartPremium;*/
+      @Column(name = "dateStartPremium")
+      Date dateStartPremium;*/
     @CreationTimestamp
     @Column(name = "createdAt")
     Date createdAt;
@@ -125,11 +125,12 @@ public class User implements Serializable, UserDetails {
     private BigDecimal accountBalance;
 
     @Column(name = "accountType")
-     String accountType;
+    String accountType;
 
     @Column(name = "role")
     @Enumerated(EnumType.STRING)
     Role role;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + this.role.name()));
@@ -153,8 +154,6 @@ public class User implements Serializable, UserDetails {
     }
 
 
-
-
     @Override
     public boolean isCredentialsNonExpired() {
         return true;
@@ -169,5 +168,9 @@ public class User implements Serializable, UserDetails {
     @JsonManagedReference
     List<Credit> credits;
 
+    private BigDecimal income;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private List<Expense> expenses;
 }
