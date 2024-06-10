@@ -1,27 +1,29 @@
 package com.example.amanetpfe.Entities;
 
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
 @Data
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class Expense {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private  Long idExpense;
-    private  String title;
-    private  String Description;
+    private  Integer idExpense;
+
+    private BigDecimal amount;
     private String category;
+    private  String Description;
     private LocalDate date;
-    private Integer amount;
+
+    @ManyToOne
+    private User user;
+
 }

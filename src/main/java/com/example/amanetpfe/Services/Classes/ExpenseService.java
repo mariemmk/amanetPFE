@@ -1,7 +1,9 @@
 package com.example.amanetpfe.Services.Classes;
 
 import com.example.amanetpfe.Entities.Expense;
+import com.example.amanetpfe.Entities.User;
 import com.example.amanetpfe.Repositories.ExpenseRepository;
+import com.example.amanetpfe.Repositories.IUserRepository;
 import com.example.amanetpfe.Services.Interfaces.IExpenseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +16,8 @@ import java.util.List;
 public class ExpenseService implements IExpenseService {
     @Autowired
     ExpenseRepository expenseRepository;
+    @Autowired
+    IUserRepository userRepository;
 
 
     @Override
@@ -22,23 +26,25 @@ public class ExpenseService implements IExpenseService {
     }
 
     @Override
-    public Expense addExpense(Expense expense) {
+    public Expense addExpense(Expense expense , Integer idUser) {
+        User user = userRepository.findById(idUser).orElseThrow(() -> new RuntimeException("User not found"));
+        expense.setUser(user);
         return expenseRepository.save(expense);
     }
 
     @Override
-    public Expense retrieveExpense(Long idExpense) {
+    public Expense retrieveExpense(Integer idExpense) {
         return null;
     }
 
     @Override
-    public void removeExpense(Long idExpense) {
+    public void removeExpense(Integer idExpense) {
         expenseRepository.deleteById(idExpense);
 
     }
 
     @Override
-    public Expense updateExpense(Expense expense) {
+    public Expense updateExpense(Integer expense) {
         return null;
     }
 

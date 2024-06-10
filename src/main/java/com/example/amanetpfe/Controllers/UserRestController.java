@@ -39,9 +39,9 @@ public class UserRestController {
 
 
 
-    @PutMapping("/edit/{id}")
+    @PutMapping("/edit/{idUser}")
     @Operation(description = "edit one user")
-    User editUser(@PathVariable("id") Integer idUser, @RequestBody User user){
+    User editUser(@PathVariable("idUser") Integer idUser, @RequestBody User user){
         return userService.updateUser(user);
     }
 
