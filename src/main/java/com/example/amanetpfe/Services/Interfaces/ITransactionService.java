@@ -30,5 +30,7 @@ public interface ITransactionService {
 
     Credit createCreditRequest(String loanType, BigDecimal amount, int duration, Integer idUser, Double carPrice, Integer horsepower);
 
+    void removeCreditRequest(Long id);
+
     List<AmortizationEntry> getAmortizationScheduleForCredit(Long id);
 }

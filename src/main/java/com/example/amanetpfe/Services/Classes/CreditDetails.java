@@ -13,9 +13,11 @@ public class CreditDetails {
 
     private List<AmortizationEntry> amortizationSchedule;
 
-    private double maxCreditAmount;
-    private double monthlyPayment;
-
+    private BigDecimal maxCreditAmount;
+    private BigDecimal monthlyPayment;
     public CreditDetails(BigDecimal maxCreditAmount, BigDecimal monthlyPayment) {
+        this.maxCreditAmount = maxCreditAmount;
+        this.monthlyPayment = monthlyPayment;
     }
+
 }

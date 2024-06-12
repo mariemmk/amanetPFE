@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +32,8 @@ public class TransactionService implements ITransactionService {
 
     @Autowired
     private CreditRequestRepository creditRepository;
+
+
 
     @Override
     public void saveTransaction(TransactionDto transactionDto) {
@@ -69,24 +72,23 @@ public class TransactionService implements ITransactionService {
         double rate = 12;
 
         // Calculer le montant maximal du crédit en fonction de la puissance de la voiture
-        double maxCreditAmount;
+        BigDecimal maxCreditAmount;
         if (horsepower == 4) {
-            maxCreditAmount = carPrice * 0.80;
+            maxCreditAmount = BigDecimal.valueOf(carPrice * 0.80);
         } else if (horsepower >= 5) {
-            maxCreditAmount = carPrice * 0.60;
+            maxCreditAmount = BigDecimal.valueOf(carPrice * 0.60);
         } else {
             throw new IllegalArgumentException("Puissance de voiture non valide. La puissance doit être 4 ou plus.");
         }
 
-        double monthlyRate = (rate / 100) / 12;
+        BigDecimal monthlyRate = BigDecimal.valueOf((rate / 100) / 12);
         int months = duration * 12;
-        double monthlyPayment = (maxCreditAmount * monthlyRate) / (1 - Math.pow(1 + monthlyRate, -months));
+        BigDecimal monthlyPayment = maxCreditAmount.multiply(monthlyRate)
+                .divide(BigDecimal.ONE.subtract(monthlyRate.pow(-months)), 2, RoundingMode.HALF_UP);
 
-        monthlyPayment = Math.round(monthlyPayment * 100.0) / 100.0;
-        maxCreditAmount = Math.round(maxCreditAmount * 100.0) / 100.0;
-
-        return new CreditDetails(BigDecimal.valueOf(maxCreditAmount), BigDecimal.valueOf(monthlyPayment));
+        return new CreditDetails(maxCreditAmount, monthlyPayment);
     }
+
 
     @Override
     public double Credim_Watani(double amount, int duration, String loanType) {
@@ -139,7 +141,7 @@ public class TransactionService implements ITransactionService {
         User user = userRepository.findById(idUser).orElseThrow(() -> new RuntimeException("User not found"));
 
         double rate;
-        double monthlyPayment;
+        double monthlyPayment = 0;
         List<AmortizationEntry> amortizationEntries = null;
 
         switch (loanType) {
@@ -158,11 +160,10 @@ public class TransactionService implements ITransactionService {
                 }
                 CreditDetails details = Auto_invest(carPrice, duration, horsepower);
                 rate = 12;
-                monthlyPayment = details.getMonthlyPayment();
-                amount = BigDecimal.valueOf(details.getMaxCreditAmount());
+                monthlyPayment = details.getMonthlyPayment().doubleValue();
+                amount = details.getMaxCreditAmount();
                 amortizationEntries = createAmortizationSchedule(amount, rate, duration);
                 break;
-
             case "Credim_Watani":
                 rate = 13;
                 monthlyPayment = Credim_Watani(amount.doubleValue(), duration, loanType);
@@ -178,6 +179,8 @@ public class TransactionService implements ITransactionService {
             default:
                 throw new IllegalArgumentException("Type de crédit non valide.");
         }
+
+        // Supprimer la redéfinition de la variable monthlyPayment ici
 
         Credit credit = Credit.builder()
                 .loanType(loanType)
@@ -204,6 +207,14 @@ public class TransactionService implements ITransactionService {
 
         return creditRepository.save(credit);
     }
+
+
+    @Override
+    public void removeCreditRequest(Long id) {
+        creditRepository.deleteById(id);
+
+    }
+
     @Override
     public List<AmortizationEntry> getAmortizationScheduleForCredit(Long id) {
         Credit credit = creditRepository.findById(id).orElse(null);

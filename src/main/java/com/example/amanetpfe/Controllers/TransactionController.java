@@ -64,8 +64,8 @@ public class TransactionController {
         response.setRepaymentFrequency("Mensuel");
         response.setNumberOfInstallments(duration * 12);
         response.setInterestRate(12);
-        response.setInstallmentAmount(creditDetails.getMonthlyPayment());
-        response.setMaxCreditAmount(creditDetails.getMaxCreditAmount());
+        response.setInstallmentAmount(creditDetails.getMonthlyPayment().doubleValue());
+        response.setMaxCreditAmount(creditDetails.getMaxCreditAmount().doubleValue());
 
         return response;
     }
