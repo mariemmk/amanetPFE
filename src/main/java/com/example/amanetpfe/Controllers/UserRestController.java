@@ -11,7 +11,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/user")
@@ -147,5 +149,11 @@ public class UserRestController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(userBankDetails, HttpStatus.OK);
+    }
+
+
+    @GetMapping("/budget/{idUser}")
+    public Map<String, BigDecimal> getBudget(@PathVariable Integer idUser) {
+        return userService.calculateBudget(idUser);
     }
 }

@@ -5,7 +5,9 @@ import com.example.amanetpfe.dto.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 public interface IUserService {
     List<User> retrieveAllUsers();
@@ -47,4 +49,6 @@ public interface IUserService {
     BankResponse debitAccount(CreditDebitRequest request);
     BankResponse transfer(TransferRequest request);
 
+    //balance enquiry , name enquiry , credit , debit , transfer
+    Map<String, BigDecimal> calculateBudget(Integer idUser);
 }

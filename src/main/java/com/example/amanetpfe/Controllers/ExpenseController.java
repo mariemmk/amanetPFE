@@ -1,6 +1,7 @@
 package com.example.amanetpfe.Controllers;
 
 import com.example.amanetpfe.Entities.Expense;
+import com.example.amanetpfe.Entities.Income;
 import com.example.amanetpfe.Entities.Reclamation;
 import com.example.amanetpfe.Entities.User;
 import com.example.amanetpfe.Services.Interfaces.IExpenseService;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -29,12 +31,11 @@ public class ExpenseController {
         }
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
-
-
-    @GetMapping("/ideal/{idUser}")
-    public Map<String, BigDecimal> getIdealExpenses(@PathVariable Integer idUser) {
-        return expenseService.calculateIdealExpenses(idUser);
+    @GetMapping("/listExpenses/{idUser}")
+    public List<Expense> getAllExpenses(@PathVariable Integer idUser) {
+        return expenseService.allExpenses(idUser);
     }
+
 
 
 }

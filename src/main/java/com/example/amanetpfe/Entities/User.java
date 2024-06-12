@@ -168,7 +168,9 @@ public class User implements Serializable, UserDetails {
     @JsonManagedReference
     List<Credit> credits;
 
-    private BigDecimal income;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private List<Income> incomes;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     @JsonManagedReference

@@ -17,7 +17,7 @@ public class Expense {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private  Integer idExpense;
+    private  Long idExpense;
 
     private BigDecimal amount;
     private String category;

@@ -25,8 +25,9 @@ public class ExpenseService implements IExpenseService {
 
 
     @Override
-    public List<Expense> allExpenses() {
-        return expenseRepository.findAll();
+    public List<Expense> allExpenses(Integer idUser) {
+        User user =userRepository.findById(idUser).orElse(null);
+        return expenseRepository.findByUser(user);
     }
 
     @Override
@@ -37,43 +38,20 @@ public class ExpenseService implements IExpenseService {
     }
 
     @Override
-    public Expense retrieveExpense(Integer idExpense) {
+    public Expense retrieveExpense(Long idExpense) {
         return null;
     }
 
     @Override
-    public void removeExpense(Integer idExpense) {
+    public void removeExpense(Long idExpense) {
         expenseRepository.deleteById(idExpense);
 
     }
 
     @Override
-    public Expense updateExpense(Integer expense) {
+    public Expense updateExpense(Long expense) {
         return null;
     }
 
-    @Override
-    public Map<String, BigDecimal> calculateIdealExpenses(Integer idUser) {
-        Optional<User> userOptional = userRepository.findById(idUser);
-        if (userOptional.isPresent()) {
-            User user = userOptional.get();
-            Map<String, BigDecimal> idealExpenses = new HashMap<>();
 
-            BigDecimal income = user.getIncome();
-
-            // Calcul des montants idéaux pour chaque catégorie de dépenses
-            BigDecimal necessities = income.multiply(new BigDecimal("0.50"));
-            BigDecimal savings = income.multiply(new BigDecimal("0.20"));
-            BigDecimal discretionary = income.multiply(new BigDecimal("0.30"));
-
-            // Ajout des montants idéaux à la carte
-            idealExpenses.put("Necessities", necessities);
-            idealExpenses.put("Savings", savings);
-            idealExpenses.put("Discretionary", discretionary);
-
-            return idealExpenses;
-        } else {
-            throw new RuntimeException("User not found with id: " + idUser);
-        }
-    }
 }

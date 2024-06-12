@@ -26,7 +26,7 @@ public class CreditRequestService implements ICreditRequestService {
     @Override
     public Credit createCreditRequest(Credit creditRequest, Integer idUser) {
         User user = userRepository.findById(idUser).orElseThrow(() -> new RuntimeException("User not found"));
-        creditRequest.setDate(LocalDate.now());
+        creditRequest.setRequestDate(LocalDate.now());
         creditRequest.setStatus("PENDING");
         creditRequest.setUser(user);
         return creditRequestRepository.save(creditRequest);
@@ -58,7 +58,7 @@ public class CreditRequestService implements ICreditRequestService {
         }
 
         // Perform the approval logic, e.g., updating user account balance
-        BigDecimal updatedBalance = accountBalance.add(credit.getCreditAmount());
+        BigDecimal updatedBalance = accountBalance.add(credit.getAmount());
         user.setAccountBalance(updatedBalance);
 
         // Save the updated user

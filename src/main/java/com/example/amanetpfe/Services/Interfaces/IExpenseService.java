@@ -10,16 +10,16 @@ import java.util.Map;
 
 public interface IExpenseService {
 
-    List<Expense> allExpenses() ;
+    List<Expense> allExpenses(Integer idUser) ;
 
     Expense addExpense(Expense expense , Integer idUser);
 
-    Expense retrieveExpense(Integer idExpense);
+    Expense retrieveExpense(Long idExpense);
 
-    void removeExpense(Integer idExpense);
+    void removeExpense(Long idExpense);
 
-    Expense updateExpense(Integer expense);
+    Expense updateExpense(Long expense);
 
 
-    Map<String, BigDecimal> calculateIdealExpenses(Integer idUser);
+
 }

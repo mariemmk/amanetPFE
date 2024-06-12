@@ -1,24 +1,21 @@
 package com.example.amanetpfe.Services.Classes;
 
+import com.example.amanetpfe.Entities.AmortizationEntry;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.math.BigDecimal;
+import java.util.List;
 
 @Getter
 @Setter
 public class CreditDetails {
-    private final double maxCreditAmount;
-    private final double monthlyPayment;
 
-    public CreditDetails(double maxCreditAmount, double monthlyPayment) {
-        this.maxCreditAmount = maxCreditAmount;
-        this.monthlyPayment = monthlyPayment;
-    }
+    private List<AmortizationEntry> amortizationSchedule;
 
-    public double getMaxCreditAmount() {
-        return maxCreditAmount;
-    }
+    private double maxCreditAmount;
+    private double monthlyPayment;
 
-    public double getMonthlyPayment() {
-        return monthlyPayment;
+    public CreditDetails(BigDecimal maxCreditAmount, BigDecimal monthlyPayment) {
     }
 }

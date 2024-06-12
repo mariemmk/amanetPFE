@@ -1,6 +1,5 @@
 package com.example.amanetpfe.Services.Classes;
 
-import com.example.amanetpfe.Entities.Role;
 import com.example.amanetpfe.Entities.User;
 import com.example.amanetpfe.Repositories.IUserRepository;
 import com.example.amanetpfe.Services.Interfaces.IUserService;
@@ -15,10 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 
 @Service
 public class UserServiceImpl implements IUserService {
@@ -569,8 +565,31 @@ private TransactionService transactionService;
 
 
     //balance enquiry , name enquiry , credit , debit , transfer
+   @Override
+    public Map<String, BigDecimal> calculateBudget(Integer idUser) {
+        User user = userRepository.findById(idUser).orElseThrow(() -> new RuntimeException("User not found"));
 
+        BigDecimal totalIncome = user.getIncomes().stream()
+                .map(income -> income.getAmount())
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
+        BigDecimal totalExpenses = user.getExpenses().stream()
+                .map(expense -> expense.getAmount())
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        BigDecimal needs = totalIncome.multiply(BigDecimal.valueOf(0.50));
+        BigDecimal wants = totalIncome.multiply(BigDecimal.valueOf(0.30));
+        BigDecimal savings = totalIncome.multiply(BigDecimal.valueOf(0.20));
+
+        Map<String, BigDecimal> budget = new HashMap<>();
+        budget.put("needs", needs);
+        budget.put("wants", wants);
+        budget.put("savings", savings);
+        budget.put("totalIncome", totalIncome);
+        budget.put("totalExpenses", totalExpenses);
+
+        return budget;
+    }
 
 
 }
