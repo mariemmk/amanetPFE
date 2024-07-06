@@ -30,6 +30,13 @@ public class UserRequest {
     private Long CIN;
     private Role role;
     private String RIB;
+  /*  //employe
+    private String Profession;
+    private String NomDeEmployeur;
+    //reserver au professionnels
+    private String NomCommercial;
+    private String SecteurActivite;
+**/
 
 
 

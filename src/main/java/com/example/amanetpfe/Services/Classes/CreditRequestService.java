@@ -1,7 +1,9 @@
 package com.example.amanetpfe.Services.Classes;
 
+import com.example.amanetpfe.Entities.BankAccount;
 import com.example.amanetpfe.Entities.Credit;
 import com.example.amanetpfe.Entities.User;
+import com.example.amanetpfe.Repositories.BankAccountRepository;
 import com.example.amanetpfe.Repositories.CreditRequestRepository;
 import com.example.amanetpfe.Repositories.IUserRepository;
 import com.example.amanetpfe.Services.Interfaces.ICreditRequestService;
@@ -21,6 +23,11 @@ public class CreditRequestService implements ICreditRequestService {
     private CreditRequestRepository creditRequestRepository;
     @Autowired
     private IUserRepository userRepository;
+    @Autowired
+    private BankAccountRepository bankAccountRepository;
+
+    @Autowired
+    private EmailSender emailSender;
 
 
     @Override
@@ -51,31 +58,50 @@ public class CreditRequestService implements ICreditRequestService {
             throw new IllegalStateException("Credit has no associated user");
         }
 
-        BigDecimal accountBalance = user.getAccountBalance();
-
-        if (accountBalance == null) {
-            accountBalance = BigDecimal.ZERO; // Default to zero if null
+        if (user.getBankAccount() != null ) {
+            throw new IllegalStateException("User has no associated bank accounts");
         }
 
-        // Perform the approval logic, e.g., updating user account balance
-        BigDecimal updatedBalance = accountBalance.add(credit.getAmount());
-        user.setAccountBalance(updatedBalance);
+        // Assuming that the first bank account is the one to be credited
+        BankAccount bankAccount = user.getBankAccount();
 
-        // Save the updated user
-        userRepository.save(user);
+        // Update the bank account balance
+        BigDecimal updatedBalance = bankAccount.getAccountBalance().add(credit.getAmount());
+        bankAccount.setAccountBalance(updatedBalance);
+
+        // Save the updated bank account
+        bankAccountRepository.save(bankAccount);
 
         // Update the credit status or other fields as necessary
         credit.setStatus("Approved");
 
+        String subject = "Votre Demande de Credit a été approuvée";
+        String text = "Cher(e) " + user.getFirstName() + " " + user.getFamilyName() + ",\n\nVotre demande de crédit de " + credit.getAmount() + " a été approuvée.\n\nMerci de votre confiance.";
+
+        emailSender.sendEmail(user.getEmail(), subject, text);
+
         // Save the updated credit
         return creditRequestRepository.save(credit);
     }
+
+
+
+
     @Override
     public Credit rejectCreditRequest(Long id) {
         Optional<Credit> optionalCreditRequest = creditRequestRepository.findById(id);
         if (optionalCreditRequest.isPresent()) {
             Credit creditRequest = optionalCreditRequest.get();
             creditRequest.setStatus("REJECTED");
+
+            // Send email notification to the user
+            User user = creditRequest.getUser();
+            if (user != null) {
+                String subject = "Votre demande de crédit a été rejetée";
+                String text = "Cher "+" "+ user.getFirstName() + ",\n\nNous sommes désolés de vous informer que votre demande de crédit de " + creditRequest.getAmount() + " a été rejetée.\n\nMerci de votre compréhension.";
+                emailSender.sendEmail(user.getEmail(), subject, text);
+            }
+
             return creditRequestRepository.save(creditRequest);
         }
         throw new IllegalArgumentException("Credit request not found");

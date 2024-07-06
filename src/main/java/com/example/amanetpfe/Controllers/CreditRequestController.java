@@ -52,7 +52,6 @@ public class CreditRequestController {
         Credit credit = creditRequestService.rejectCreditRequest(id);
         return ResponseEntity.ok(credit);
     }
-
     @PostMapping("/create/{idUser}")
     public ResponseEntity<Credit> createCreditRequest(
             @RequestParam String loanType,

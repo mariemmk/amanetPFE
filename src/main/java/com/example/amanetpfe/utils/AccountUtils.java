@@ -60,6 +60,16 @@ public class AccountUtils {
 
     public  static final String TRANSFER_SUCCESSFUL_CODE ="008";
     public static final String TRANSFER_SUCCESSFUL_MESSAGE  ="Transfer successful";
+
+
+    public static final String REQUEST_NOT_FOUND_CODE  ="009";
+    public static final String REQUEST_NOT_FOUND_MESSAGE  ="request Not found";
+
+
+
+    public static final String TRANSACTION_SUCCESS="010";
+
+    public static final String TRANSACTION_SUCCESS_CODE ="transaction successful";
 }
 
 

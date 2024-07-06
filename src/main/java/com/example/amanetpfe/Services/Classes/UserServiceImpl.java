@@ -1,216 +1,174 @@
 package com.example.amanetpfe.Services.Classes;
 
+import com.example.amanetpfe.Entities.BankAccount;
 import com.example.amanetpfe.Entities.User;
+import com.example.amanetpfe.Repositories.BankAccountRepository;
 import com.example.amanetpfe.Repositories.IUserRepository;
+import com.example.amanetpfe.Repositories.accountRequestRepository;
 import com.example.amanetpfe.Services.Interfaces.IUserService;
-
-
 import com.example.amanetpfe.dto.*;
 import com.example.amanetpfe.utils.AccountUtils;
+
+import com.example.amanetpfe.utils.UserNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.*;
 
 @Service
 public class UserServiceImpl implements IUserService {
-    @Autowired
-    private IUserRepository userRepository ;
 
+    private final IUserRepository userRepository;
+    private final TransactionService transactionService;
+    private final PasswordEncoder passwordEncoder;
+    private final EmailSender emailSender;
+    private final BankAccountRepository bankAccountRepository;
+    private final accountRequestRepository accountRequestRepository;
 
-@Autowired
-private TransactionService transactionService;
     @Autowired
-    private PasswordEncoder bCryptPasswordEncoder;
-
-    @Autowired
-    private EmailSender emailSender;
+    public UserServiceImpl(IUserRepository userRepository, TransactionService transactionService,
+                           PasswordEncoder passwordEncoder, EmailSender emailSender,
+                           BankAccountRepository bankAccountRepository,
+                           accountRequestRepository accountRequestRepository) {
+        this.userRepository = userRepository;
+        this.transactionService = transactionService;
+        this.passwordEncoder = passwordEncoder;
+        this.emailSender = emailSender;
+        this.bankAccountRepository = bankAccountRepository;
+        this.accountRequestRepository = accountRequestRepository;
+    }
 
     @Override
     public List<User> retrieveAllUsers() {
-        return this.userRepository.findAll();
+        return userRepository.findAll();
     }
 
     @Override
     public BankResponse creationAccount(UserRequest userRequest) {
-        /**
-         * Creating an account - saving new user into the db
-         * check if user already has an account
-         */
-
-
-
-        if (userRepository.existsByEmail(userRequest.getEmail())){
-            BankResponse response = BankResponse.builder()
+        if (userRepository.existsByEmail(userRequest.getEmail())) {
+            return BankResponse.builder()
                     .responseCode(AccountUtils.ACCOUNT_EXISTS_CODE)
                     .responseMessage(AccountUtils.ACCOUNT_EXIST_MESSAGE)
                     .accountInfo(null)
                     .build();
-            return response;
         }
 
+        User newUser = createUserFromRequest(userRequest);
+        userRepository.save(newUser);
+        createAndSaveAccountRequest(newUser, userRequest.getAccountType());
+        sendEmail(newUser.getEmail(), "Account Creation Request", "Your account creation request has been submitted and is pending approval.");
 
-        User newUser = User.builder()
+        return BankResponse.builder()
+                .responseCode(AccountUtils.ACCOUNT_CREATION_SUCCESS)
+                .responseMessage("Account request submitted successfully.")
+                .build();
+    }
+    @Override
+    public User createUserFromRequest(UserRequest userRequest) {
+        return User.builder()
                 .firstName(userRequest.getFirstName())
                 .familyName(userRequest.getFamilyName())
                 .otherName(userRequest.getOtherName())
                 .gender(userRequest.getGender())
                 .address(userRequest.getAddress())
                 .stateOfOrigin(userRequest.getStateOfOrigin())
-                .accountNumber(AccountUtils.generateAccountNumber())
                 .email(userRequest.getEmail())
-                .accountBalance(BigDecimal.ZERO)
-                .accountType(userRequest.getAccountType())
                 .phoneNumber(userRequest.getPhoneNumber())
                 .alternativePhoneNumber(userRequest.getAlternativePhoneNumber())
-                .password(bCryptPasswordEncoder.encode(userRequest.getPassword()))
+                .password(passwordEncoder.encode(userRequest.getPassword()))
                 .status("ACTIVE")
                 .birthDate(userRequest.getBirthDate())
                 .cin(userRequest.getCIN())
                 .role(userRequest.getRole())
-                .rib(AccountUtils.generateRIB())
-                
-                .build();
-        User savedUser = userRepository.save(newUser);
-        EmailDetails emailDetails = EmailDetails.builder()
-                .recipient(savedUser.getEmail())
-                .subject("Account Creation")
-                .messageBody("Congratulation! your account has been successfully created " +" "
-                        +savedUser.getFirstName()+" "+savedUser.getFamilyName()
-                        +savedUser.getAccountNumber() +" "+savedUser.getRib()+" "
-                        +savedUser.getAccountBalance()
-                )
-
-                .build();
-        emailSender.sendEmailAlert(emailDetails);
-        return  BankResponse.builder()
-                .responseCode(AccountUtils.ACCOUNT_CREATION_SUCCESS)
-                .responseMessage(AccountUtils.ACCOUNT_CREATION_MESSAGE)
-                .accountInfo(AccountInfo.builder()
-                        .accountBalance(savedUser.getAccountBalance())
-                        .accountNumber(savedUser.getAccountNumber())
-                        .cin(savedUser.getCin())
-                        .RIB(savedUser.getRib())
-                        .accountName(savedUser.getFirstName()+savedUser.getFamilyName()+savedUser.getOtherName())
-
-                        .build())
                 .build();
     }
-
-
-
 
     @Override
-    public String afficheIdentiteBancair(User user){
-        User u = this.userRepository.findById(user.getIdUser()).orElse(null);
-        String bic= "CFCTTNTT";
-        if(u!= null ){
-            StringBuilder identiteBancaireBuilder = new StringBuilder();
-            identiteBancaireBuilder.append("Nom: ").append(u.getFamilyName()).append("\n");
-            identiteBancaireBuilder.append("Prénom: ").append(u.getFirstName()).append("\n");
-            identiteBancaireBuilder.append("Solde: ").append(u.getAccountBalance()).append("\n");
-            identiteBancaireBuilder.append("Date de naissance: ").append(u.getBirthDate()).append("\n");
-            identiteBancaireBuilder.append("Nature du Compte : ").append(u.getAccountType()).append("\n");
-            identiteBancaireBuilder.append("RIB : ").append(u.getRib()).append("\n");
-            identiteBancaireBuilder.append("Code BIC : ").append(bic).append("\n");
-
-            return identiteBancaireBuilder.toString();
-        }else{
-            return "utilisateur  non trouve";
-        }
+    public void createAndSaveAccountRequest(User user, String accountType) {
+        AccountRequest accountRequest = AccountRequest.builder()
+                .accountType(accountType)
+                .status("PENDING")
+                .requestDate(new Date())
+                .user(user)
+                .build();
+        accountRequestRepository.save(accountRequest);
     }
 
-
-    /*public User addUser(User user) {
-        boolean test = isMailExisit(user);
-        if (!isMailExisit(user)) {
-            // Encoder le mot de passe
-            user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-            user.setLastPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-            user.setLastDateChangePassword(user.getCreatedAt());
-
-            // Sauvegarder l'utilisateur dans la base de données
-            User savedUser = this.userRepository.save(user);
-
-            // Vérifier que le rôle de l'utilisateur est "USER"
-            if (user.getRole() == Role.USER) {
-                // Créer automatiquement un compte bancaire pour l'utilisateur
-                Account account = new Account();
-                account.setTotSolde(20.0);
-                // Associer l'utilisateur au compte
-                account.setUser(savedUser);
-                account.setDevise("TND");
-
-                // Sauvegarder le compte dans la base de données
-                account = accountService.saveAccount(account);
-
-                // Mettre à jour le champ account de l'utilisateur avec le compte sauvegardé
-                savedUser.setAccount(account);
-            }
-
-            return savedUser;
-        }
-        return null;
+    @Override
+    public void sendEmail(String recipient, String subject, String body) {
+        EmailDetails emailDetails = EmailDetails.builder()
+                .recipient(recipient)
+                .subject(subject)
+                .messageBody(body)
+                .build();
+        emailSender.sendEmailAlert(emailDetails);
     }
 
-*/
+    @Override
+    public BankResponse approveAccountRequest(Integer idRequest) {
+        AccountRequest accountRequest = getAccountRequestById(idRequest);
+        accountRequest.setStatus("APPROVED");
+        accountRequest.setResponseDate(new Date());
+        accountRequestRepository.save(accountRequest);
 
+        BankAccount bankAccount = createAndSaveBankAccount(accountRequest);
+        sendEmail(accountRequest.getUser().getEmail(), "Account Creation Approved",
+                "Your account creation request has been approved. Your account number is: " + bankAccount.getAccountNumber());
+
+        return BankResponse.builder()
+                .responseCode(AccountUtils.ACCOUNT_CREATION_SUCCESS)
+                .responseMessage("Account creation request approved successfully.")
+                .build();
+    }
+
+    private AccountRequest getAccountRequestById(Integer requestId) {
+        return accountRequestRepository.findById(requestId)
+                .orElseThrow(() -> new UserNotFoundException("Request not found"));
+    }
+
+    private BankAccount createAndSaveBankAccount(AccountRequest accountRequest) {
+        BankAccount bankAccount = BankAccount.builder()
+                .accountNumber(AccountUtils.generateAccountNumber())
+                .rib(AccountUtils.generateRIB())
+                .accountBalance(BigDecimal.ZERO)
+                .accountType(accountRequest.getAccountType())
+                .user(accountRequest.getUser())
+                .build();
+        bankAccountRepository.save(bankAccount);
+        return bankAccount;
+    }
+
+    @Override
+    public String afficheIdentiteBancair(Integer idUser) {
+        User u= userRepository.findById(idUser).orElse(null);
+        String bic = "CFCTTNTT";
+        if (u != null && u.getBankAccount() != null) {
+            BankAccount bankAccount = u.getBankAccount(); // Assuming you want the first bank account
+            return String.format("Nom: %s%nPrénom: %s%nSolde: %s%nDate de naissance: %s%nNature du Compte: %s%nRIB: %s%nCode BIC: %s",
+                    u.getFamilyName(), u.getFirstName(), bankAccount.getAccountBalance(), u.getBirthDate(), bankAccount.getAccountType(), bankAccount.getRib(), bic);
+        } else {
+            return "Utilisateur non trouvé ou pas de compte bancaire";
+        }
+    }
 
     @Override
     public User retrieveUser(Integer idUser) {
-        return this.userRepository.findById(idUser).orElse(null);
+        return userRepository.findById(idUser).orElseThrow(() -> new UserNotFoundException("User not found"));
     }
 
     @Override
     public void removeUser(Integer idUser) {
-        this.userRepository.deleteById(idUser);
+        userRepository.deleteById(idUser);
     }
 
     @Override
     public User updateUser(User user) {
-        User u = this.userRepository.findById(user.getIdUser()).orElse(null);
-        if (u != null) {
-            return this.userRepository.save(user);
-        }
-        return null;
-    }
-
-    private Long generateUniqueId() {
-        long timestamp = System.currentTimeMillis();
-
-        Random random = new Random();
-        int randomNum = random.nextInt(90000) + 10000;
-
-        String uniqueIdStr = String.valueOf(timestamp) + String.valueOf(randomNum);
-
-        uniqueIdStr = uniqueIdStr.substring(uniqueIdStr.length() - 15);
-
-        Long uniqueId = Long.parseLong(uniqueIdStr);
-
-        return uniqueId;
-    }
-
-    private boolean isMailExisit(User user){
-        Optional<User> obj = this.userRepository.findByEmail(user.getEmail());
-        if(obj.isEmpty()){
-            return false;
-        }
-        return true;
-    }
-
-
-
-    public void updateCodes() {
-        List<User> users = userRepository.findAll();
-        for (User user : users) {
-            String newCode = generateNewCode();
-            user.setCodeVerif(newCode);
-            userRepository.save(user);
-        }
+        User existingUser = userRepository.findById(user.getIdUser())
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+        return userRepository.save(user);
     }
 
     @Override
@@ -222,30 +180,17 @@ private TransactionService transactionService;
         String verificationCode = generateNewCode();
         user.setCodeVerif(verificationCode);
         userRepository.save(user);
-        String userEmail = user.getEmail();
-        String emailSubject = "Code de  Verification";
-        String emailText = "Votre code de verification : "+verificationCode;
-        emailSender.sendEmail(userEmail, emailSubject, emailText);
+        sendEmail(user.getEmail(), "Code de Verification", "Votre code de verification: " + verificationCode);
         return true;
     }
 
     @Override
     public boolean isVerificationCodeValid(String email, String verificationCode) {
         User user = userRepository.findUserByEmail(email);
-        if (user == null) {
-            return false; // L'utilisateur n'existe pas
+        if (user == null || user.getCodeVerif() == null || user.getCodeVerif().isEmpty()) {
+            return false;
         }
-
-        String storedVerificationCode = user.getCodeVerif();
-
-        if (storedVerificationCode == null || storedVerificationCode.isEmpty()) {
-            return false; // Aucun code de vérification n'est enregistré pour cet utilisateur
-        }
-
-        boolean isValid = storedVerificationCode.equals(verificationCode);
-
-        return isValid;
-
+        return user.getCodeVerif().equals(verificationCode);
     }
 
     @Override
@@ -254,7 +199,6 @@ private TransactionService transactionService;
         if (user == null) {
             return false;
         }
-        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         String encodedNewPassword = passwordEncoder.encode(newPassword);
         if (!encodedNewPassword.equals(user.getLastPassword())) {
             user.setLastPassword(user.getPassword());
@@ -263,33 +207,13 @@ private TransactionService transactionService;
             user.setLastModifiedAt(new Date());
             userRepository.save(user);
             return true;
-        }else{
+        } else {
             return false;
         }
     }
 
-   /* @Override
-    public boolean isVerificationCodeValidVerif(String email, String verificationCode) {
-        User user = userRepository.findUserByEmail(email);
-        if (user == null) {
-            return false; // L'utilisateur n'existe pas
-        }
-
-        String storedVerificationCode = user.getCodeVerif();
-
-        if (storedVerificationCode == null || storedVerificationCode.isEmpty()) {
-            return false; // Aucun code de vérification n'est enregistré pour cet utilisateur
-        }
-
-        boolean isValid = storedVerificationCode.equals(verificationCode);
-        user.setIsVerified(true);
-        userRepository.save(user);
 
 
-        return isValid;
-
-    }
-*/
 
     public String generateNewCode() {
         int codeLength = 6;
@@ -306,252 +230,8 @@ private TransactionService transactionService;
         return code.toString();
     }
 
-  /*  @Override
-    public void uploadProfilePicture(int idUser, MultipartFile file) throws IOException {
-        // Vérifier si l'utilisateur existe
-        User user = userRepository.findById(idUser).orElseThrow(() -> new EntityNotFoundException("Utilisateur non trouvé"));
-
-        // Définir l'emplacement de stockage des fichiers téléchargés (ex. dossier "uploads" dans le répertoire de ressources)
-        String uploadDirectory = "src/main/resources/uploads";
-
-        // Créer le dossier s'il n'existe pas
-        File directory = new File(uploadDirectory);
-        if (!directory.exists()) {
-            directory.mkdirs();
-        }
-
-        // Nom du fichier téléchargé
-        String fileName = user.getIdUser() + "_" + file.getOriginalFilename();
-
-        // Chemin complet du fichier sur le serveur
-        Path filePath = Paths.get(uploadDirectory, fileName);
-
-        // Copier le fichier téléchargé vers le serveur
-        FileCopyUtils.copy(file.getBytes(), filePath.toFile());
-
-        // Mettre à jour le chemin de la photo de profil dans l'entité User
-        user.setPhoto("/uploads/" + fileName);
-
-        // Enregistrer les modifications dans la base de données
-        userRepository.save(user);
-    }*/
-
-  /*  @Override
-    public User banUser(Integer idUser) {
-        Optional<User> userOptional = userRepository.findById(idUser);
-        if (userOptional.isPresent()) {
-            User user = userOptional.get();
-            user.setIsBanned(true);
-            return userRepository.save(user);
-        } else {
-            // Handle the case where the user with the given ID doesn't exist
-            return null;
-        }
-    }*/
 
     @Override
-    public BankResponse balanceEnquiry(EnquiryRequest request) {
-// check if account exist
-        boolean isAccountExist = userRepository.existsByAccountNumber(request.getAccountNumber());
-        if(!isAccountExist){
-            return BankResponse.builder()
-                    .responseCode(AccountUtils.ACCOUNT_NOT_EXIST_CODE)
-                    .responseMessage(AccountUtils.ACCOUNT_NOT_EXIST_MESSAGE)
-                    .accountInfo(null)
-                    .build();
-
-        }
-        User foundUser = userRepository.findByAccountNumber(request.getAccountNumber());
-        return  BankResponse.builder()
-                .responseMessage(AccountUtils.ACCOUNT_FOUND_SUCCESS)
-                .responseCode(AccountUtils.ACCOUNT_FOUND_CODE)
-                .accountInfo(AccountInfo.builder()
-                        .accountBalance(foundUser.getAccountBalance())
-                        .accountName(foundUser.getFirstName() + "" +foundUser.getFamilyName())
-                        .accountNumber(foundUser.getAccountNumber())
-                        .build())
-                .build();
-    }
-
-    @Override
-    public String nameEnquiry(EnquiryRequest request) {
-        boolean isAccountExist = userRepository.existsByAccountNumber(request.getAccountNumber());
-        if(!isAccountExist){
-            return AccountUtils.ACCOUNT_NOT_EXIST_MESSAGE;
-
-       }
-        User foundUser = userRepository.findByAccountNumber(request.getAccountNumber());
-        return foundUser.getFirstName()+" "+foundUser.getFamilyName()+""+foundUser.getOtherName();
-    }
-
-
-    @Override
-    public BankResponse creditAccount(CreditDebitRequest request) {
-        //cheking if account exist
-        boolean isAccountExist = userRepository.existsByAccountNumber(request.getAccountNumber());
-        if(!isAccountExist){
-            return BankResponse.builder()
-                    .responseCode(AccountUtils.ACCOUNT_NOT_EXIST_CODE)
-                    .responseMessage(AccountUtils.ACCOUNT_NOT_EXIST_MESSAGE)
-                    .accountInfo(null)
-                    .build();
-
-        }
-
-        User userToCredit =userRepository.findByAccountNumber(request.getAccountNumber());
-        //update amount account balance + credit
-         userToCredit.setAccountBalance(userToCredit.getAccountBalance().add(request.getAmount()));
-         userRepository.save(userToCredit);
-
-
-         /// save transaction
-        TransactionDto transactionDto = TransactionDto.builder()
-                .accountNumber(userToCredit.getAccountNumber())
-                .typeTransaction("CREDIT")
-                .amount(request.getAmount())
-                .devise("TND")
-                .build();
-
-        transactionService.saveTransaction(transactionDto);
-
-
-        return  BankResponse.builder()
-                .responseMessage(AccountUtils.ACCOUNT_CREDITED_SUCCESS_MESSAGE)
-                .responseCode(AccountUtils.ACCOUNT_CREDITED_SUCCESS)
-                .accountInfo(AccountInfo.builder()
-                        .accountName(userToCredit.getFirstName()+" "+userToCredit.getFamilyName())
-                        .accountBalance(userToCredit.getAccountBalance())
-                        .accountNumber(userToCredit.getAccountNumber())
-                        .RIB(userToCredit.getRib())
-                        .cin(userToCredit.getCin())
-                        .build()
-                )
-                .build();
-
-    }
-
-    @Override
-    public BankResponse debitAccount(CreditDebitRequest request) {
-        //check if account exist
-        //check if amount is valid
-        boolean isAccountExist = userRepository.existsByAccountNumber(request.getAccountNumber());
-        if(!isAccountExist){
-            return BankResponse.builder()
-                    .responseCode(AccountUtils.ACCOUNT_NOT_EXIST_CODE)
-                    .responseMessage(AccountUtils.ACCOUNT_NOT_EXIST_MESSAGE)
-                    .accountInfo(null)
-                    .build();
-
-        }
-
-      User userToDebit = userRepository.findByAccountNumber(request.getAccountNumber());
-
-        BigInteger availableBalance = userToDebit.getAccountBalance().toBigInteger()  ;
-        BigInteger debitAmount = request.getAmount().toBigInteger();
-        if( availableBalance.intValue()< debitAmount.intValue()){
-            return  BankResponse.builder()
-                    .responseCode(AccountUtils.INSUFFICIENT_BALANCE_CODE)
-                    .responseMessage(AccountUtils.INSUFFICIENT_BALANCE_MESSAGE)
-                    .accountInfo(null).
-                    build();
-        }
-
-
-        else {
-            userToDebit.setAccountBalance(userToDebit.getAccountBalance().subtract(request.getAmount()));
-            userRepository.save(userToDebit);
-
-            TransactionDto transactionDto = TransactionDto.builder()
-                    .accountNumber(userToDebit.getAccountNumber())
-                    .typeTransaction("DEBIT")
-                    .amount(request.getAmount())
-                    .devise("TND")
-                    .build();
-
-            transactionService.saveTransaction(transactionDto);
-            return  BankResponse.builder()
-                    .responseCode(AccountUtils.ACCOUNT_DEBITED_SUCCESS_CODE)
-                    .responseCode(AccountUtils.ACCOUNT_DEBITED_SUCCESS_MESSAGE)
-                    .accountInfo(AccountInfo.builder()
-                            .accountNumber(request.getAccountNumber())
-                            .accountName(userToDebit.getFirstName()+" "+userToDebit.getFamilyName())
-                            .accountBalance(userToDebit.getAccountBalance())
-                            .cin(userToDebit.getCin())
-                            .RIB(userToDebit.getRib())
-                            .build())
-                    .build();
-        }
-
-    }
-
-    @Override
-    public BankResponse transfer(TransferRequest request) {
-       //get the account to debit
-//check if the amount  i m debiting is not the the curent balance
-        // debit the amount
-        // get the account to credit
-        // credit the account
-        boolean isDestinationAccountExiste = userRepository.existsByAccountNumber(request.getDestinationAccountNumber());
-        if(!isDestinationAccountExiste){
-            return BankResponse.builder()
-                    .responseCode(AccountUtils.ACCOUNT_NOT_EXIST_CODE)
-                    .responseMessage(AccountUtils.ACCOUNT_NOT_EXIST_MESSAGE)
-                    .accountInfo(null)
-                    .build();
-
-        }
-        User  sourceAccountUser = userRepository.findByAccountNumber(request.getSourceAccountNumber());
-        if(request.getAmount().compareTo(sourceAccountUser.getAccountBalance())>0 ) {
-
-            return BankResponse.builder()
-                    .responseCode(AccountUtils.INSUFFICIENT_BALANCE_CODE)
-                    .responseMessage(AccountUtils.INSUFFICIENT_BALANCE_MESSAGE)
-                    .accountInfo(null).
-                    build();
-        }
-
-        sourceAccountUser.setAccountBalance(sourceAccountUser.getAccountBalance().subtract(request.getAmount()));
-        String sourceUserName = sourceAccountUser.getFamilyName()+" "+sourceAccountUser.getFamilyName();
-
-        userRepository.save(sourceAccountUser);
-        EmailDetails debitAlert = EmailDetails.builder()
-                .recipient(sourceAccountUser.getEmail())
-                .subject("Debit Alert")
-                .messageBody("the sum of  " +" "
-                        +request.getAmount()+"has been deducted from your account! your current balance is  "+sourceAccountUser.getAccountBalance())
-                .build();
-        emailSender.sendEmailAlert(debitAlert);
-
-
-        User destinationAccountUser = userRepository.findByAccountNumber(request.getDestinationAccountNumber());
-        destinationAccountUser.setAccountBalance(destinationAccountUser.getAccountBalance().add(request.getAmount()));
-        //String recipientUserName = destinationAccountUser.getFirstName()+" "+destinationAccountUser.getFamilyName();
-        userRepository.save(destinationAccountUser);
-        EmailDetails creditAlert = EmailDetails.builder()
-                .recipient(sourceAccountUser.getEmail())
-                .subject("Credit Alert")
-                .messageBody("the sum of  " +" " +request.getAmount()+"has been sent to your account from  "+ " " +sourceUserName+ " your current balancce is "+sourceAccountUser.getAccountBalance())
-                .build();
-        emailSender.sendEmailAlert(creditAlert);
-
-
-        TransactionDto transactionDto = TransactionDto.builder()
-                .accountNumber(destinationAccountUser.getAccountNumber())
-                .typeTransaction("TRANSFER")
-                .amount(request.getAmount())
-                .devise("TND")
-                .build();
-
-        transactionService.saveTransaction(transactionDto);
-        return BankResponse.builder()
-                .responseCode(AccountUtils.TRANSFER_SUCCESSFUL_CODE)
-                .responseCode(AccountUtils.TRANSFER_SUCCESSFUL_MESSAGE)
-                .build();
-
-    }
-
-
-
     public boolean checkOldPassword(String password, Integer idUser) {
         User user = userRepository.findById(idUser).orElse(null);
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
@@ -564,31 +244,9 @@ private TransactionService transactionService;
     }
 
 
-    //balance enquiry , name enquiry , credit , debit , transfer
-   @Override
-    public Map<String, BigDecimal> calculateBudget(Integer idUser) {
-        User user = userRepository.findById(idUser).orElseThrow(() -> new RuntimeException("User not found"));
-
-        BigDecimal totalIncome = user.getIncomes().stream()
-                .map(income -> income.getAmount())
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        BigDecimal totalExpenses = user.getExpenses().stream()
-                .map(expense -> expense.getAmount())
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        BigDecimal needs = totalIncome.multiply(BigDecimal.valueOf(0.50));
-        BigDecimal wants = totalIncome.multiply(BigDecimal.valueOf(0.30));
-        BigDecimal savings = totalIncome.multiply(BigDecimal.valueOf(0.20));
-
-        Map<String, BigDecimal> budget = new HashMap<>();
-        budget.put("needs", needs);
-        budget.put("wants", wants);
-        budget.put("savings", savings);
-        budget.put("totalIncome", totalIncome);
-        budget.put("totalExpenses", totalExpenses);
-
-        return budget;
+    @Override
+    public List<AccountRequest> getAllAccountRequests() {
+        return accountRequestRepository.findAll();
     }
 
 

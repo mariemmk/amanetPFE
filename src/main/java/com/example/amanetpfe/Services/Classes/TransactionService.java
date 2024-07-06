@@ -71,23 +71,28 @@ public class TransactionService implements ITransactionService {
     public CreditDetails Auto_invest(double carPrice, int duration, int horsepower) {
         double rate = 12;
 
-        // Calculer le montant maximal du crédit en fonction de la puissance de la voiture
+        // Calculate the maximum credit amount based on car horsepower
         BigDecimal maxCreditAmount;
         if (horsepower == 4) {
             maxCreditAmount = BigDecimal.valueOf(carPrice * 0.80);
         } else if (horsepower >= 5) {
             maxCreditAmount = BigDecimal.valueOf(carPrice * 0.60);
         } else {
-            throw new IllegalArgumentException("Puissance de voiture non valide. La puissance doit être 4 ou plus.");
+            throw new IllegalArgumentException("Invalid car horsepower. Horsepower must be 4 or more.");
         }
 
         BigDecimal monthlyRate = BigDecimal.valueOf((rate / 100) / 12);
         int months = duration * 12;
+
+        // Correct the calculation to avoid using a negative exponent
+        BigDecimal onePlusMonthlyRate = BigDecimal.ONE.add(monthlyRate);
+        BigDecimal denominator = onePlusMonthlyRate.pow(months).subtract(BigDecimal.ONE);
         BigDecimal monthlyPayment = maxCreditAmount.multiply(monthlyRate)
-                .divide(BigDecimal.ONE.subtract(monthlyRate.pow(-months)), 2, RoundingMode.HALF_UP);
+                .divide(denominator, 2, RoundingMode.HALF_UP);
 
         return new CreditDetails(maxCreditAmount, monthlyPayment);
     }
+
 
 
     @Override

@@ -10,45 +10,40 @@ import java.util.List;
 import java.util.Map;
 
 public interface IUserService {
+
     List<User> retrieveAllUsers();
 
-    String afficheIdentiteBancair(User user);
+    BankResponse creationAccount(UserRequest userRequest);
 
-   // User addUser(User user);
+    User createUserFromRequest(UserRequest userRequest);
+
+    void createAndSaveAccountRequest(User user, String accountType);
+
+    void sendEmail(String recipient, String subject, String body);
+
+    BankResponse approveAccountRequest(Integer idRequest);
+
+    String afficheIdentiteBancair(Integer idUser);
 
     User retrieveUser(Integer idUser);
 
     void removeUser(Integer idUser);
 
-    public void updateCodes();
-
-    public boolean sendVerificationCodeByEmail(String email) ;
-
-    public boolean isVerificationCodeValid(String email, String verificationCode);
-
-    public boolean changePassword(String email, String newPassword) ;
-
-    //public boolean isVerificationCodeValidVerif(String email, String verificationCode) ;
-
     User updateUser(User user);
 
-    public boolean checkOldPassword(String password, Integer idUser);
+    boolean sendVerificationCodeByEmail(String email);
 
-   // void uploadProfilePicture(int idUser, MultipartFile file) throws IOException;
+    boolean isVerificationCodeValid(String email, String verificationCode);
 
-   // User banUser(Integer idUser);
-    BankResponse balanceEnquiry(EnquiryRequest request);
+    boolean changePassword(String email, String newPassword);
+
+   /* BankResponse balanceEnquiry(EnquiryRequest request);
 
     String nameEnquiry(EnquiryRequest request);
 
+    BankResponse updateAccountBalance(TransactionDto transactionDto);*/
 
-    BankResponse creationAccount(UserRequest userRequest);
+    boolean checkOldPassword(String password, Integer idUser);
 
-    BankResponse creditAccount(CreditDebitRequest request);
-
-    BankResponse debitAccount(CreditDebitRequest request);
-    BankResponse transfer(TransferRequest request);
-
-    //balance enquiry , name enquiry , credit , debit , transfer
-    Map<String, BigDecimal> calculateBudget(Integer idUser);
+    List<AccountRequest> getAllAccountRequests();
 }

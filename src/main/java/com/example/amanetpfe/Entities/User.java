@@ -1,15 +1,10 @@
 package com.example.amanetpfe.Entities;
 
-
 import java.io.Serializable;
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-
+import java.util.Collection;
+import java.util.Collections;
 
 import javax.persistence.*;
 
@@ -22,8 +17,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-
 import lombok.experimental.FieldDefaults;
+
 @Entity
 @Table(name = "User")
 @Data
@@ -41,14 +36,15 @@ public class User implements Serializable, UserDetails {
 
     @Column(name = "firstname")
     String firstName;
+
     @Column(name = "familyName")
     String familyName;
+
     @Column(name = "otherName")
     String otherName;
 
     @Column(name = "photo")
     String photo;
-
 
     @Column(name = "Gender")
     String gender;
@@ -77,19 +73,6 @@ public class User implements Serializable, UserDetails {
     @Column(name = "birthDate")
     Date birthDate;
 
-
-
-   /* @Column(name = "isVerified")
-    Boolean isVerified;*/
-
-   /* @Column(name = "isBanned")
-    Boolean isBanned;*/
-
-    /*  @Column(name = "isPremium")
-      Boolean isPremium;
-
-      @Column(name = "dateStartPremium")
-      Date dateStartPremium;*/
     @CreationTimestamp
     @Column(name = "createdAt")
     Date createdAt;
@@ -107,25 +90,8 @@ public class User implements Serializable, UserDetails {
     @Column(name = "address")
     String address;
 
-
     @Column(name = "codeVerif")
     String codeVerif;
-
-  /*  @OneToMany(mappedBy = "user")
-    @JsonIgnore
-    List<Reclamation> reclamations;*/
-
-    @Column(name = "accountNumber")
-    private String accountNumber;
-
-    @Column(name = "rib")
-    private String rib;
-
-    @Column(name = "accountBalance")
-    private BigDecimal accountBalance;
-
-    @Column(name = "accountType")
-    String accountType;
 
     @Column(name = "role")
     @Enumerated(EnumType.STRING)
@@ -135,7 +101,6 @@ public class User implements Serializable, UserDetails {
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + this.role.name()));
     }
-
 
     @Override
     public String getUsername() {
@@ -150,9 +115,7 @@ public class User implements Serializable, UserDetails {
     @Override
     public boolean isAccountNonLocked() {
         return true;
-
     }
-
 
     @Override
     public boolean isCredentialsNonExpired() {
@@ -175,4 +138,8 @@ public class User implements Serializable, UserDetails {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     @JsonManagedReference
     private List<Expense> expenses;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference
+    BankAccount bankAccount;
 }
