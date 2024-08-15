@@ -88,6 +88,46 @@ public class CreditRequestController {
         return response;
     }
 
+    @PostMapping("/request")
+    public ResponseEntity<Credit> createCreditRequest(
+            @RequestParam String loanType,
+            @RequestParam BigDecimal amount,
+            @RequestParam int duration,
+            @RequestParam Integer idUser,
+            @RequestParam(required = false) Double carPrice,
+            @RequestParam(required = false) Integer horsepower,
+            @RequestParam(required = false) String employeur,
+            @RequestParam(required = false) String addressEmplyeur,
+            @RequestParam(required = false) String postOccupe,
+            @RequestParam(required = false) BigDecimal revenuMensuels,
+            @RequestParam(required = false) String typeContract,
+            @RequestParam(required = false) String creditEnCours) {
 
+        try {
+            Credit credit = creditRequestService.createCreditRequest(loanType,
+                    amount,
+                    duration,
+                    idUser,
+                    carPrice,
+                    horsepower,
+                    employeur,
+                    addressEmplyeur,
+                    postOccupe,
+                    revenuMensuels,
+                    typeContract,
+                    creditEnCours);
+            return ResponseEntity.ok(credit);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(null);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(404).body(null);
+        }
+    }
+
+
+    @GetMapping("/requests")
+    public List<Credit> getAllCreditRequests() {
+        return creditRequestService.getAllCreditRequests();
+    }
 
 }

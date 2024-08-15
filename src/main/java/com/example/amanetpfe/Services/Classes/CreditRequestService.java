@@ -15,6 +15,7 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -122,7 +123,11 @@ public class CreditRequestService implements ICreditRequestService {
     }
 
     @Override
-    public Credit createCreditRequest(String loanType, BigDecimal amount, int duration, Integer idUser, Double carPrice, Integer horsepower) {
+    public Credit createCreditRequest(String loanType, BigDecimal amount, int duration, Integer idUser,
+                                      Double carPrice, Integer horsepower, String employeur,
+                                      String addressEmplyeur, String postOccupe,
+                                      BigDecimal revenuMensuels, String typeContract,
+                                      String creditEnCours) {
         User user = userRepository.findById(idUser).orElseThrow(() -> new RuntimeException("User not found"));
 
         double rate;
@@ -176,6 +181,12 @@ public class CreditRequestService implements ICreditRequestService {
                 .requestDate(LocalDate.now())
                 .status("PENDING")
                 .user(user)
+                .employeur(employeur)
+                .addressEmplyeur(addressEmplyeur)
+                .postOccupe(postOccupe)
+                .revenuMensuels(revenuMensuels)
+                .typeContract(typeContract)
+                .creditEnCours(creditEnCours)
                 .build();
 
         List<AmortizationEntry> amortizationSchedule = amortizationEntries.stream()
@@ -210,7 +221,61 @@ public class CreditRequestService implements ICreditRequestService {
         }
     }
 
-    public Credit getCreditById(Long id) { return creditRepository.findById(id)
-            .orElseThrow(() -> new IllegalArgumentException("Crédit non trouvé avec l'ID : " + id));
+
+
+
+    @Override
+    public List<Credit> getAllCreditRequests() {
+        return creditRepository.findAll();
     }
+    @Override
+    public Optional<Credit> getCreditRequestById(Long id) {
+        return creditRepository.findById(id);
+    }
+
+
+
+  /*  @Override
+    public Credit approveCredit(Long id) {
+        Credit credit = creditRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid credit ID: " + id));
+
+        User user = credit.getUser();
+
+        if (user == null) {
+            throw new IllegalStateException("Credit has no associated user");
+        }
+
+        BigDecimal accountBalance = user.getAccountBalance();
+
+        if (accountBalance == null) {
+            accountBalance = BigDecimal.ZERO; // Default to zero if null
+        }
+
+        // Perform the approval logic, e.g., updating user account balance
+        BigDecimal updatedBalance = accountBalance.add(credit.getAmount());
+        user.setAccountBalance(updatedBalance);
+
+        // Save the updated user
+        userRepository.save(user);
+
+        // Update the credit status or other fields as necessary
+        credit.setStatus("Approved");
+
+        // Save the updated credit
+        return creditRepository.save(credit);
+    }*/
+    @Override
+    public Credit rejectCreditRequest(Long id) {
+        Optional<Credit> optionalCreditRequest = creditRepository.findById(id);
+        if (optionalCreditRequest.isPresent()) {
+            Credit creditRequest = optionalCreditRequest.get();
+            creditRequest.setStatus("REJECTED");
+            return creditRepository.save(creditRequest);
+        }
+        throw new IllegalArgumentException("Credit request not found");
+    }
+
+
+
 }

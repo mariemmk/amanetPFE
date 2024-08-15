@@ -1,5 +1,6 @@
 package com.example.amanetpfe.Entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import javax.persistence.*;
 import java.io.Serializable;
@@ -31,5 +32,6 @@ public class BankAccount implements Serializable {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_user", referencedColumnName = "idUser", nullable = false)
+    @JsonIgnore
     private User user;
 }

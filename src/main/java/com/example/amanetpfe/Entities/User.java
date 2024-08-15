@@ -1,5 +1,6 @@
 package com.example.amanetpfe.Entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -128,5 +129,6 @@ public class User implements Serializable, UserDetails {
     private List<Expense> expenses;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @JsonIgnore
     private BankAccount bankAccount;
 }

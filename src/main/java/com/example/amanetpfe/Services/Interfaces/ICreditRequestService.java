@@ -24,9 +24,22 @@ public interface ICreditRequestService {
 
     double Credim_Express(double amount, int duration);
 
-    Credit createCreditRequest(String loanType, BigDecimal amount, int duration, Integer idUser, Double carPrice, Integer horsepower);
+
+    Credit createCreditRequest(String loanType, BigDecimal amount, int duration, Integer idUser,
+                               Double carPrice, Integer horsepower, String employeur,
+                               String addressEmplyeur, String postOccupe,
+                               BigDecimal revenuMensuels, String typeContract,
+                               String creditEnCours);
 
     void removeCreditRequest(Long id);
 
     List<AmortizationEntry> getAmortizationScheduleForCredit(Long id);
+
+    List<Credit> getAllCreditRequests();
+
+    Optional<Credit> getCreditRequestById(Long id);
+
+  //  Credit approveCredit(Long id);
+
+    Credit rejectCreditRequest(Long id);
 }
