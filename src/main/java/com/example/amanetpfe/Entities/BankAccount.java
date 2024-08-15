@@ -1,11 +1,6 @@
 package com.example.amanetpfe.Entities;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
+import lombok.*;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -35,7 +30,6 @@ public class BankAccount implements Serializable {
     String accountType;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "idUser")
-    @JsonBackReference
-    User user;
+    @JoinColumn(name = "id_user", referencedColumnName = "idUser", nullable = false)
+    private User user;
 }

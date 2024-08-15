@@ -37,13 +37,11 @@ public interface IUserService {
 
     boolean changePassword(String email, String newPassword);
 
-   /* BankResponse balanceEnquiry(EnquiryRequest request);
 
-    String nameEnquiry(EnquiryRequest request);
-
-    BankResponse updateAccountBalance(TransactionDto transactionDto);*/
 
     boolean checkOldPassword(String password, Integer idUser);
 
     List<AccountRequest> getAllAccountRequests();
+
+    Map<String, Long> getAccountRequestCountByStatus();
 }

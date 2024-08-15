@@ -1,23 +1,20 @@
 package com.example.amanetpfe.Entities;
 
-import java.io.Serializable;
-import java.util.Date;
-import java.util.List;
-import java.util.Collection;
-import java.util.Collections;
-
-import javax.persistence.*;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.*;
+import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import lombok.experimental.FieldDefaults;
+import javax.persistence.*;
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "User")
@@ -40,9 +37,6 @@ public class User implements Serializable, UserDetails {
     @Column(name = "familyName")
     String familyName;
 
-    @Column(name = "otherName")
-    String otherName;
-
     @Column(name = "photo")
     String photo;
 
@@ -50,10 +44,7 @@ public class User implements Serializable, UserDetails {
     String gender;
 
     @Column(name = "phoneNumber")
-    Long phoneNumber;
-
-    @Column(name = "alternativephoneNumber")
-    Long alternativePhoneNumber;
+    String phoneNumber;
 
     @Column(name = "stateOfOrigin")
     String stateOfOrigin;
@@ -128,18 +119,14 @@ public class User implements Serializable, UserDetails {
     }
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonManagedReference
     List<Credit> credits;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    @JsonManagedReference
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Income> incomes;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    @JsonManagedReference
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Expense> expenses;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonManagedReference
-    BankAccount bankAccount;
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    private BankAccount bankAccount;
 }

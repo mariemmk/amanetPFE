@@ -71,13 +71,11 @@ public class UserServiceImpl implements IUserService {
         return User.builder()
                 .firstName(userRequest.getFirstName())
                 .familyName(userRequest.getFamilyName())
-                .otherName(userRequest.getOtherName())
                 .gender(userRequest.getGender())
                 .address(userRequest.getAddress())
                 .stateOfOrigin(userRequest.getStateOfOrigin())
                 .email(userRequest.getEmail())
                 .phoneNumber(userRequest.getPhoneNumber())
-                .alternativePhoneNumber(userRequest.getAlternativePhoneNumber())
                 .password(passwordEncoder.encode(userRequest.getPassword()))
                 .status("ACTIVE")
                 .birthDate(userRequest.getBirthDate())
@@ -168,7 +166,7 @@ public class UserServiceImpl implements IUserService {
     public User updateUser(User user) {
         User existingUser = userRepository.findById(user.getIdUser())
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
-        return userRepository.save(user);
+        return userRepository.save(existingUser);
     }
 
     @Override
@@ -248,6 +246,16 @@ public class UserServiceImpl implements IUserService {
     public List<AccountRequest> getAllAccountRequests() {
         return accountRequestRepository.findAll();
     }
-
+    @Override
+    public Map<String, Long> getAccountRequestCountByStatus() {
+        List<Object[]> results = accountRequestRepository.countAccountRequestsByStatus();
+        Map<String, Long> countByStatus = new HashMap<>();
+        for (Object[] result : results) {
+            String status = (String) result[0];
+            Long count = (Long) result[1];
+            countByStatus.put(status, count);
+        }
+        return countByStatus;
+    }
 
 }

@@ -1,89 +1,93 @@
 package com.example.amanetpfe.Controllers;
 
-
 import com.example.amanetpfe.Entities.Credit;
-import com.example.amanetpfe.Entities.Reclamation;
-import com.example.amanetpfe.Entities.User;
-import com.example.amanetpfe.Repositories.CreditRequestRepository;
+import com.example.amanetpfe.Entities.AmortizationEntry;
+import com.example.amanetpfe.Services.Classes.CreditDetails;
 import com.example.amanetpfe.Services.Classes.CreditRequestService;
-import com.example.amanetpfe.Services.Classes.InvestmentService;
-import com.example.amanetpfe.Services.Classes.TransactionService;
-import io.swagger.v3.oas.annotations.Operation;
-import lombok.AllArgsConstructor;
-import org.springframework.http.HttpStatus;
+import com.example.amanetpfe.dto.InvestmentResponse;
+import com.example.amanetpfe.dto.LoanDetailsResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/credit")
-@AllArgsConstructor
 public class CreditRequestController {
+    @Autowired
+  private CreditRequestService creditRequestService;
 
-    private final CreditRequestService creditRequestService;
-    private final TransactionService transactionService;
-    private  final InvestmentService investmentService;
-    @PostMapping("/request/{idUser}")
-    public ResponseEntity<Credit> createCreditRequest(@RequestBody Credit creditRequest, @PathVariable Integer idUser) {
-        try {
-            Credit credit = creditRequestService.createCreditRequest(creditRequest, idUser);
-            return ResponseEntity.ok(credit);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(null);
-        }
+
+    @GetMapping("preslaire_amenagement")
+    public LoanDetailsResponse simulatePreslaireAmenagement(@RequestParam double amount , @RequestParam String loanType, @RequestParam  int duration ) {
+        double monthlyPayment = creditRequestService.Preslaire_amenagement( amount , duration , loanType);
+
+        LoanDetailsResponse response = new LoanDetailsResponse();
+        response.setLoanType(loanType);
+        response.setAmount(amount);
+        response.setDurationYears(duration);
+        response.setRepaymentFrequency("Mensuel");
+        response.setNumberOfInstallments(duration * 12);
+        response.setInterestRate(13.5);
+        response.setInstallmentAmount(monthlyPayment);
+
+        return response;
     }
 
-    @GetMapping("/requests")
-    public List<Credit> getAllCreditRequests() {
-        return creditRequestService.getAllCreditRequests();
+    @GetMapping("Auto_invest")
+    public LoanDetailsResponse simulateAutoInvest(@RequestParam double amount, @RequestParam int duration, @RequestParam int horsepower) {
+        CreditDetails creditDetails = creditRequestService.Auto_invest(amount, duration, horsepower);
+
+        LoanDetailsResponse response = new LoanDetailsResponse();
+        response.setLoanType("Auto Invest");
+        response.setAmount(amount);
+        response.setDurationYears(duration);
+        response.setRepaymentFrequency("Mensuel");
+        response.setNumberOfInstallments(duration * 12);
+        response.setInterestRate(12);
+        response.setInstallmentAmount(creditDetails.getMonthlyPayment().doubleValue());
+        response.setMaxCreditAmount(creditDetails.getMaxCreditAmount().doubleValue());
+
+        return response;
     }
 
-    @PostMapping("/request/{id}/approve")
-    public ResponseEntity<Credit> approveCreditRequest(@PathVariable Long id) {
-        Credit credit = creditRequestService.approveCredit(id);
-        return ResponseEntity.ok(credit);
+    @GetMapping("Credim_Watani")
+    public LoanDetailsResponse simulateCredimWatani(@RequestParam double amount , @RequestParam  int duration , String loanType ) {
+        double monthlyPayment = creditRequestService.Credim_Watani( amount , duration , loanType );
+
+        LoanDetailsResponse response = new LoanDetailsResponse();
+        response.setLoanType(loanType);
+        response.setAmount(amount);
+        response.setDurationYears(duration);
+        response.setRepaymentFrequency("Mensuel");
+        response.setNumberOfInstallments(duration * 12);
+        response.setInterestRate(13);
+        response.setInstallmentAmount(monthlyPayment);
+
+        return response;
     }
 
-    @PostMapping("/request/{id}/reject")
-    public ResponseEntity<Credit> rejectCreditRequest(@PathVariable Long id) {
-        Credit credit = creditRequestService.rejectCreditRequest(id);
-        return ResponseEntity.ok(credit);
-    }
-    @PostMapping("/create/{idUser}")
-    public ResponseEntity<Credit> createCreditRequest(
-            @RequestParam String loanType,
-            @RequestParam BigDecimal amount,
-            @RequestParam int duration,
-            @PathVariable Integer idUser,
-            @RequestParam(required = false) Double carPrice,
-            @RequestParam(required = false) Integer horsepower) {
+    @GetMapping("Credim_Express")
+    public LoanDetailsResponse simulateCredimExpress(@RequestParam double amount , @RequestParam  int duration ) {
+        double monthlyPayment = creditRequestService.Credim_Express( amount , duration );
 
-        try {
-            Credit credit = transactionService.createCreditRequest(loanType, amount, duration, idUser, carPrice, horsepower);
-            return ResponseEntity.ok(credit);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(null);
-        }
+        LoanDetailsResponse response = new LoanDetailsResponse();
+        response.setLoanType("Credim Express");
+        response.setAmount(amount);
+        response.setDurationYears(duration);
+        response.setRepaymentFrequency("Mensuel");
+        response.setNumberOfInstallments(duration * 12);
+        response.setInterestRate(10.5);
+        response.setInstallmentAmount(monthlyPayment);
+
+        return response;
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Credit> getCreditById(@PathVariable Long id) {
-        Credit credit = transactionService.getCreditById(id);
-        if (credit != null) {
-            credit.setAmortizationSchedule(transactionService.getAmortizationScheduleForCredit(id));
-            return ResponseEntity.ok(credit);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
-    }
 
-    @DeleteMapping("/removeRequestCredit/{id}")
-    ResponseEntity<Credit> removeCreditRequest(@PathVariable("id") Long id) {
-        transactionService.removeCreditRequest(id);
-        return ResponseEntity.ok().build();
-    }
+
 }
-

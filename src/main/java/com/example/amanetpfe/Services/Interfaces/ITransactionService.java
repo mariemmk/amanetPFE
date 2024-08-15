@@ -6,6 +6,7 @@ import com.example.amanetpfe.Entities.Transaction;
 import com.example.amanetpfe.Entities.User;
 import com.example.amanetpfe.Services.Classes.CreditDetails;
 import com.example.amanetpfe.dto.TransactionDto;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -18,19 +19,7 @@ public interface ITransactionService {
 
     List<Transaction> retrieveAllTransactions();
 
-    double Preslaire_amenagement(double amount, int duration, String loanType);
 
 
-    CreditDetails Auto_invest(double carPrice, int duration, int horsepower);
 
-    double Credim_Watani(double amount, int duration, String loanType);
-
-    double Credim_Express(double amount, int duration);
-
-
-    Credit createCreditRequest(String loanType, BigDecimal amount, int duration, Integer idUser, Double carPrice, Integer horsepower);
-
-    void removeCreditRequest(Long id);
-
-    List<AmortizationEntry> getAmortizationScheduleForCredit(Long id);
 }

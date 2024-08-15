@@ -17,26 +17,18 @@ import java.util.Date;
 public class UserRequest {
     private String firstName;
     private String familyName;
-    private String otherName;
     private String gender;
     private String address;
     private  String stateOfOrigin;
     private String email ;
-    private Long phoneNumber;
-    private Long alternativePhoneNumber;
+    private String phoneNumber;
     private String Password;
     private Date birthDate;
     private String accountType;
     private Long CIN;
     private Role role;
     private String RIB;
-  /*  //employe
-    private String Profession;
-    private String NomDeEmployeur;
-    //reserver au professionnels
-    private String NomCommercial;
-    private String SecteurActivite;
-**/
+
 
 
 

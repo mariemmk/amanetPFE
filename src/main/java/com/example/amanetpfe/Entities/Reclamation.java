@@ -3,6 +3,7 @@ package com.example.amanetpfe.Entities;
 
 import javax.persistence.*;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -33,5 +34,6 @@ public class Reclamation {
 
 
     @ManyToOne
+    @JsonIgnoreProperties
     private User user;
 }

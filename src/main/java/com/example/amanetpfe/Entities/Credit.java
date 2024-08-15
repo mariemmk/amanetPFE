@@ -1,21 +1,18 @@
 package com.example.amanetpfe.Entities;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
-
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
-@Builder
 @Entity
 @Table(name = "Credit")
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Credit {
 
     @Id
@@ -29,13 +26,20 @@ public class Credit {
     private BigDecimal monthlyPayment;
     private LocalDate requestDate;
     private String status; // PENDING, APPROVED, REJECTED
+    private String employeur;
+    private String addressEmplyeur;
+    private String postOccupe;
+    private BigDecimal revenuMensuels;
+    private String typeContract;
+    private String creditEnCours;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "idUser")
-    @JsonBackReference
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "id_user", nullable = false)
+    @JsonIgnore
     private User user;
 
     @OneToMany(mappedBy = "credit", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonManagedReference
     private List<AmortizationEntry> amortizationSchedule;
+
+
 }

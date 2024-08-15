@@ -49,10 +49,10 @@ public class ReclamationController {
         return reclamationService.updateReclamation(reclamation);
     }
 
-    @DeleteMapping("/remove/{id}")
+    @DeleteMapping("/remove/{reclamationId}")
     @Operation(description = "remove user by id")
-    ResponseEntity<Reclamation> removeReclamation(@PathVariable("id") Integer idReclamation){
-        reclamationService.removeReclamation(idReclamation);
+    ResponseEntity<Reclamation> removeReclamation(@PathVariable("reclamationId") Integer reclamationId){
+        reclamationService.removeReclamation(reclamationId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

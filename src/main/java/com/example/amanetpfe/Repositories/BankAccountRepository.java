@@ -11,4 +11,6 @@ import java.util.Optional;
 public interface BankAccountRepository extends JpaRepository<BankAccount , Integer> {
     Optional<BankAccount> findByAccountNumber(String accountNumber);
     BankAccount findByUser(User user);
+
+    //requet tjibli 9adeh mn compte APPROVED exp  JPA  (groupe by)
 }

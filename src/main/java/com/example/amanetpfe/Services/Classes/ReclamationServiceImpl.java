@@ -28,13 +28,13 @@ public class ReclamationServiceImpl implements IReclamationService {
     }
 
     @Override
-    public Reclamation retrieveReclamation(Integer idReclamation) {
-        return reclamationRepository.findById(idReclamation).orElse(null);
+    public Reclamation retrieveReclamation(Integer reclamationId) {
+        return reclamationRepository.findById(reclamationId).orElse(null);
     }
 
     @Override
-    public void removeReclamation(Integer idReclamtion) {
-        reclamationRepository.deleteById(idReclamtion);
+    public void removeReclamation(Integer reclamationId) {
+        reclamationRepository.deleteById(reclamationId);
 
     }
 
