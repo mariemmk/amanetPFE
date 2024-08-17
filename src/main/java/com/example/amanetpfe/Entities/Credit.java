@@ -36,7 +36,7 @@ public class Credit {
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "id_user", nullable = false)
-    @JsonIgnore
+
     private User user;
 
     @OneToMany(mappedBy = "credit", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
