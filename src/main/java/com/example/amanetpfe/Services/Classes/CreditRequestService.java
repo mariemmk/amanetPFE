@@ -8,14 +8,23 @@ import com.example.amanetpfe.Repositories.IUserRepository;
 import com.example.amanetpfe.Repositories.TransactionRepository;
 import com.example.amanetpfe.Services.Interfaces.ICreditRequestService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,6 +37,31 @@ public class CreditRequestService implements ICreditRequestService {
     @Autowired
     private CreditRequestRepository creditRepository;
 
+
+    @Autowired
+    private ResourceLoader resourceLoader;
+
+    private final Path fileStorageLocation;
+
+    @Autowired
+    public CreditRequestService(@Value("${file.storage.location}") String fileStorageLocation) {
+        this.fileStorageLocation = Paths.get(fileStorageLocation)
+                .toAbsolutePath().normalize();
+    }
+
+    public Resource loadFileAsResource(String filePath) {
+        try {
+            Path path = Paths.get(filePath).toAbsolutePath().normalize();
+            Resource resource = resourceLoader.getResource("file:" + path.toString());
+            if (resource.exists()) {
+                return resource;
+            } else {
+                throw new RuntimeException("File not found " + filePath);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Could not load file " + filePath, e);
+        }
+    }
     @Override
     public double Preslaire_amenagement(double amount, int duration, String loanType) {
         if (duration > 3) {
@@ -120,13 +154,31 @@ public class CreditRequestService implements ICreditRequestService {
 
         return schedule;
     }
+    public String saveFile(MultipartFile file) {
+        try {
+            // Define the file storage location
+            String fileStorageLocation = "C:/Users/marie/OneDrive/file-storage-amennet/";
+
+            // Create a unique file name
+            String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+
+            // Save the file to the directory
+            Path filePath = Paths.get(fileStorageLocation + fileName);
+            Files.write(filePath, file.getBytes());
+
+            // Return the path to save in the database
+            return filePath.toString();
+        } catch (IOException e) {
+            throw new RuntimeException("Error saving file", e);
+        }
+    }
 
     @Override
     public Credit createCreditRequest(String loanType, BigDecimal amount, int duration, Integer idUser,
                                       Double carPrice, Integer horsepower, String employeur,
                                       String addressEmplyeur, String postOccupe,
                                       BigDecimal revenuMensuels, String typeContract,
-                                      String creditEnCours) {
+                                      String creditEnCours, MultipartFile file) {
         User user = userRepository.findById(idUser).orElseThrow(() -> new RuntimeException("User not found"));
 
         double rate;
@@ -169,6 +221,8 @@ public class CreditRequestService implements ICreditRequestService {
                 throw new IllegalArgumentException("Type de crédit non valide.");
         }
 
+        // Save the file and get the file path
+        String filePath = saveFile(file);
         // Supprimer la redéfinition de la variable monthlyPayment ici
 
         Credit credit = Credit.builder()
@@ -186,6 +240,7 @@ public class CreditRequestService implements ICreditRequestService {
                 .revenuMensuels(revenuMensuels)
                 .typeContract(typeContract)
                 .creditEnCours(creditEnCours)
+                .filePath(filePath)
                 .build();
 
         List<AmortizationEntry> amortizationSchedule = amortizationEntries.stream()

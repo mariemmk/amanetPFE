@@ -1,7 +1,7 @@
 package com.example.amanetpfe.Entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import lombok.*;
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -33,7 +33,7 @@ public class Credit {
     private BigDecimal revenuMensuels;
     private String typeContract;
     private String creditEnCours;
-
+    private String filePath;
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "id_user", nullable = false)
 

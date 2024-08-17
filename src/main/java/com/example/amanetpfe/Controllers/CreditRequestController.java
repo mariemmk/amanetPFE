@@ -7,10 +7,18 @@ import com.example.amanetpfe.Services.Classes.CreditRequestService;
 import com.example.amanetpfe.dto.InvestmentResponse;
 import com.example.amanetpfe.dto.LoanDetailsResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -101,7 +109,8 @@ public class CreditRequestController {
             @RequestParam(required = false) String postOccupe,
             @RequestParam(required = false) BigDecimal revenuMensuels,
             @RequestParam(required = false) String typeContract,
-            @RequestParam(required = false) String creditEnCours) {
+            @RequestParam(required = false) String creditEnCours,
+            @RequestParam("file") MultipartFile file) {
 
         try {
             Credit credit = creditRequestService.createCreditRequest(loanType,
@@ -115,7 +124,7 @@ public class CreditRequestController {
                     postOccupe,
                     revenuMensuels,
                     typeContract,
-                    creditEnCours);
+                    creditEnCours,file);
             return ResponseEntity.ok(credit);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(null);
@@ -130,4 +139,35 @@ public class CreditRequestController {
         return creditRequestService.getAllCreditRequests();
     }
 
+
+
+    @GetMapping("/request/{id}/file")
+    public ResponseEntity<Resource> downloadFile(@PathVariable Long id) {
+        Optional<Credit> optionalCredit = creditRequestService.getCreditRequestById(id);
+
+        if (optionalCredit.isPresent()) {
+            Credit credit = optionalCredit.get();
+            String filePath = credit.getFilePath();
+
+            if (filePath != null && !filePath.isEmpty()) {
+                Resource resource = creditRequestService.loadFileAsResource(filePath);
+
+                String contentType;
+                try {
+                    contentType = Files.probeContentType(Paths.get(filePath));
+                } catch (IOException e) {
+                    contentType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
+                }
+
+                return ResponseEntity.ok()
+                        .contentType(MediaType.parseMediaType(contentType))
+                        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
+                        .body(resource);
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            }
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+    }
 }

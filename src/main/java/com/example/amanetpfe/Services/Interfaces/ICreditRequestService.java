@@ -29,7 +29,7 @@ public interface ICreditRequestService {
                                Double carPrice, Integer horsepower, String employeur,
                                String addressEmplyeur, String postOccupe,
                                BigDecimal revenuMensuels, String typeContract,
-                               String creditEnCours);
+                               String creditEnCours, MultipartFile file);
 
     void removeCreditRequest(Long id);
 
