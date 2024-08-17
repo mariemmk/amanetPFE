@@ -1,9 +1,11 @@
 package com.example.amanetpfe.Services.Classes;
 
 import com.example.amanetpfe.Entities.BankAccount;
+import com.example.amanetpfe.Entities.Transaction;
 import com.example.amanetpfe.Entities.User;
 import com.example.amanetpfe.Repositories.BankAccountRepository;
 import com.example.amanetpfe.Repositories.IUserRepository;
+import com.example.amanetpfe.Repositories.TransactionRepository;
 import com.example.amanetpfe.Services.Interfaces.IBankAccountService;
 import com.example.amanetpfe.dto.*;
 import com.example.amanetpfe.utils.AccountUtils;
@@ -17,14 +19,14 @@ import java.util.Optional;
 @Service
 public class BankAccountService implements IBankAccountService {
 
-    private final BankAccountRepository bankAccountRepository;
+
+    @Autowired
+    private  BankAccountRepository bankAccountRepository;
+    @Autowired
+    private TransactionRepository transactionRepository;
     @Autowired
     private IUserRepository userRepository;
 
-    @Autowired
-    public BankAccountService(BankAccountRepository bankAccountRepository) {
-        this.bankAccountRepository = bankAccountRepository;
-    }
 
     @Override
     public BankAccount getBankAccountByUser(Integer idUser) {
@@ -44,6 +46,14 @@ public class BankAccountService implements IBankAccountService {
             account.setAccountBalance(newBalance);
             bankAccountRepository.save(account);
 
+            Transaction transaction = new Transaction();
+            transaction.setAccountNumber(request.getAccountNumber());
+            transaction.setTypeTransaction("Credit");
+            transaction.setDevise("TND"); // Replace with actual currency if needed
+            transaction.setAmount(request.getAmount());
+            transaction.setStatus("Success");
+            transactionRepository.save(transaction);
+
             return new BankAccountResponse("Success", "Account credited successfully");
         }
         return new BankAccountResponse("Failure", "Account not found");
@@ -58,6 +68,15 @@ public class BankAccountService implements IBankAccountService {
                 BigDecimal newBalance = account.getAccountBalance().subtract(request.getAmount());
                 account.setAccountBalance(newBalance);
                 bankAccountRepository.save(account);
+
+
+                Transaction transaction = new Transaction();
+                transaction.setAccountNumber(request.getAccountNumber());
+                transaction.setTypeTransaction("Credit");
+                transaction.setDevise("TND"); // Replace with actual currency if needed
+                transaction.setAmount(request.getAmount());
+                transaction.setStatus("Success");
+                transactionRepository.save(transaction);
 
                 return new BankAccountResponse("Success", "Account debited successfully");
             } else {
@@ -85,6 +104,24 @@ public class BankAccountService implements IBankAccountService {
 
                 bankAccountRepository.save(sourceAccount);
                 bankAccountRepository.save(destinationAccount);
+
+
+                // Save transactions
+                Transaction sourceTransaction = new Transaction();
+                sourceTransaction.setAccountNumber(request.getSourceAccountNumber());
+                sourceTransaction.setTypeTransaction("Transfer Out");
+                sourceTransaction.setDevise("TND"); // Replace with actual currency if needed
+                sourceTransaction.setAmount(request.getAmount());
+                sourceTransaction.setStatus("Success");
+                transactionRepository.save(sourceTransaction);
+
+                Transaction destinationTransaction = new Transaction();
+                destinationTransaction.setAccountNumber(request.getDestinationAccountNumber());
+                destinationTransaction.setTypeTransaction("Transfer In");
+                destinationTransaction.setDevise("TND"); // Replace with actual currency if needed
+                destinationTransaction.setAmount(request.getAmount());
+                destinationTransaction.setStatus("Success");
+                transactionRepository.save(destinationTransaction);
 
                 return new BankAccountResponse("Success", "Transfer completed successfully");
             } else {

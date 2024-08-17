@@ -1,6 +1,7 @@
 package com.example.amanetpfe.Entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.*;
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -39,6 +40,7 @@ public class Credit {
     private User user;
 
     @OneToMany(mappedBy = "credit", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore  // Ignore this field in certain contexts
     private List<AmortizationEntry> amortizationSchedule;
 
 

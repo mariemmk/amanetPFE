@@ -5,6 +5,7 @@ import com.example.amanetpfe.Entities.Reclamation;
 import com.example.amanetpfe.Entities.User;
 
 import java.math.BigDecimal;
+import java.time.YearMonth;
 import java.util.List;
 import java.util.Map;
 
@@ -21,5 +22,5 @@ public interface IExpenseService {
     Expense updateExpense(Long expense);
 
 
-
+    Map<YearMonth, BigDecimal> getMonthlyExpenses(Integer userId);
 }

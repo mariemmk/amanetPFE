@@ -10,10 +10,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.YearMonth;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -52,6 +53,28 @@ public class ExpenseService implements IExpenseService {
     public Expense updateExpense(Long expense) {
         return null;
     }
+
+    @Override
+    public Map<YearMonth, BigDecimal> getMonthlyExpenses(Integer idUser) {
+        List<Expense> expenses = allExpenses(idUser);
+        Map<YearMonth, BigDecimal> monthlyExpenses = new HashMap<>();
+
+        for (Expense expense : expenses) {
+            try {
+                if (expense.getDate() != null) {
+                    YearMonth yearMonth = YearMonth.from(expense.getDate());
+                    monthlyExpenses.merge(yearMonth, expense.getAmount(), BigDecimal::add);
+                } else {
+                    System.err.println("Expense date is null");
+                }
+            } catch (Exception e) {
+                System.err.println("Error processing expense: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+        return monthlyExpenses;
+    }
+
 
 
 }

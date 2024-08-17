@@ -1,6 +1,7 @@
 package com.example.amanetpfe.Entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -34,6 +35,6 @@ public class Income implements Serializable {
 
     @ManyToOne
     @JoinColumn(name = "id_user", nullable = false)
-    @JsonBackReference
+    @JsonIgnore
     private User user;
 }

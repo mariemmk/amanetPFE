@@ -1,6 +1,7 @@
 package com.example.amanetpfe.Entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.persistence.*;
@@ -22,10 +23,11 @@ public class Expense {
     private BigDecimal amount;
     private String category;
     private  String Description;
+    @Column(name = "date")
     private LocalDate date;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id_user")
-    @JsonBackReference
+   @JsonIgnore
     private User user;
 }

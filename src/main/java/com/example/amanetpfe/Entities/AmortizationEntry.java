@@ -1,6 +1,7 @@
 package com.example.amanetpfe.Entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.persistence.*;
@@ -26,7 +27,7 @@ public class AmortizationEntry {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "credit_id")
-    @JsonBackReference
+    @JsonIgnore
     private Credit credit;
 
     public AmortizationEntry(int month, BigDecimal principal, BigDecimal interest, BigDecimal remainingBalance, Credit credit) {

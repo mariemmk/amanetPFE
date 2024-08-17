@@ -13,6 +13,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.time.YearMonth;
 import java.util.List;
 import java.util.Map;
 
@@ -35,7 +36,13 @@ public class ExpenseController {
     public List<Expense> getAllExpenses(@PathVariable Integer idUser) {
         return expenseService.allExpenses(idUser);
     }
+    @DeleteMapping("/remove/{idExpense}")
+    public void removeExpense(@PathVariable Long idExpense) {
+        expenseService.removeExpense(idExpense);
+    }
 
-
-
+    @GetMapping("/monthly/{idUser}")
+    public Map<YearMonth, BigDecimal> getMonthlyExpenses(@PathVariable Integer idUser) {
+        return expenseService.getMonthlyExpenses(idUser);
+    }
 }

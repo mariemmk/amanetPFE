@@ -1,13 +1,9 @@
 package com.example.amanetpfe.Entities;
 
-
 import javax.persistence.*;
-
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
-
 import java.time.LocalDate;
-import java.util.Date;
 
 @Entity
 @Table(name="Reclamation")
@@ -28,12 +24,16 @@ public class Reclamation {
     private String TypeReclamation;
 
     @Column(name = "date")
-
     private LocalDate date;
 
-
-
     @ManyToOne
-    @JsonIgnoreProperties
+    @JsonIgnore
     private User user;
+
+    @PrePersist
+    protected void onCreate() {
+        if (this.date == null) {
+            this.date = LocalDate.now();
+        }
+    }
 }

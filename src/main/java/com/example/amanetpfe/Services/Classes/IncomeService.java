@@ -6,7 +6,6 @@ import com.example.amanetpfe.Repositories.IUserRepository;
 import com.example.amanetpfe.Repositories.IncomeRepository;
 import com.example.amanetpfe.Services.Interfaces.IIncomeService;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,15 +21,23 @@ public class IncomeService implements  IIncomeService {
     @Autowired
     IUserRepository userRepository;
 
+
+    @Override
     public Income addIncome(Income income , Integer idUser) {
         User user   = userRepository.findById(idUser).orElse(null);
         income.setUser(user);
         return incomeRepository.save(income);
     }
 
+    @Override
     public List<Income> getAllIncomes(Integer idUser) {
         User user= userRepository.findById(idUser).orElse(null);
 
         return incomeRepository.findByUser(user);
+    }
+    @Override
+    public void removeIncome(Long idIncome) {
+        incomeRepository.deleteById(idIncome);
+
     }
 }

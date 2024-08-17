@@ -21,4 +21,9 @@ public class IncomeController {
     public List<Income> getAllIncomes(@PathVariable Integer idUser) {
         return incomeService.getAllIncomes(idUser);
     }
+
+    @DeleteMapping("/remove/{idIncome}")
+    public void removeIncome(@PathVariable Long idIncome) {
+        incomeService.removeIncome(idIncome);
+    }
 }

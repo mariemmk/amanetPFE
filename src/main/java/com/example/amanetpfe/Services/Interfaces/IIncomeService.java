@@ -7,4 +7,6 @@ import java.util.List;
 public interface IIncomeService {
      Income addIncome(Income income , Integer idUser);
      List<Income> getAllIncomes(Integer idUser);
+
+    void removeIncome(Long idIncome);
 }

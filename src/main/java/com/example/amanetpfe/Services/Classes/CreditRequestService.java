@@ -20,8 +20,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class CreditRequestService implements ICreditRequestService {
-    @Autowired
-    private TransactionRepository transactionRepository;
+
 
     @Autowired
     private IUserRepository userRepository;

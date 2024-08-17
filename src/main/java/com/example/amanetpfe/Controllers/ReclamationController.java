@@ -12,7 +12,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/reclamation")
-@CrossOrigin(origins = "*")
+
 public class ReclamationController {
     @Autowired
     private IReclamationService reclamationService ;
