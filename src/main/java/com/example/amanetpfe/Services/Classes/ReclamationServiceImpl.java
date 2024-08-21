@@ -46,7 +46,9 @@ public class ReclamationServiceImpl implements IReclamationService {
     @Override
     public Reclamation createReclamation(Reclamation reclamation, Integer idUser) {
         User user = userRepository.findById(idUser).orElseThrow(() -> new RuntimeException("User not found"));
+
         reclamation.setUser(user);
+reclamation.setStatus("not treated");
         return reclamationRepository.save(reclamation);
     }
 }

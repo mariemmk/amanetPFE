@@ -2,6 +2,7 @@ package com.example.amanetpfe.Controllers;
 
 import com.example.amanetpfe.Entities.Reclamation;
 import com.example.amanetpfe.Services.Interfaces.IReclamationService;
+import com.example.amanetpfe.dto.ReclamationDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,7 +22,7 @@ public class ReclamationController {
     @Operation(description = "show all reclamations")
     ResponseEntity<List<Reclamation>> getAllReclamations(){
         List<Reclamation> result = reclamationService.allReclamations();
-        return new ResponseEntity<>(result, HttpStatus.FOUND);
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     @GetMapping("/show/{id}")
@@ -34,15 +35,7 @@ public class ReclamationController {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    @PostMapping("/addReclamation")
-    @Operation(description = "add new reclamation")
-    ResponseEntity<Reclamation> addReclamation(@RequestBody Reclamation reclamation){
-        Reclamation result = reclamationService.addReclamtion(reclamation);
-        if (result != null) {
-            return new ResponseEntity<>(result, HttpStatus.CREATED);
-        }
-        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-    }
+
     @PutMapping("/edit/{id}")
     @Operation(description = "edit one reclamation")
     Reclamation editReclamation(@PathVariable("id") Integer idReclamation, @RequestBody Reclamation reclamation){

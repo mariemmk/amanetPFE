@@ -1,6 +1,8 @@
 package com.example.amanetpfe.Entities;
 
 import javax.persistence.*;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import java.time.LocalDate;
@@ -26,8 +28,9 @@ public class Reclamation {
     @Column(name = "date")
     private LocalDate date;
 
+
+    private String status;
     @ManyToOne
-    @JsonIgnore
     private User user;
 
     @PrePersist
