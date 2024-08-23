@@ -86,6 +86,10 @@ public class User implements Serializable, UserDetails {
     @Column(name = "codeVerif")
     String codeVerif;
 
+    @Column(name = "totpSecret")
+    String totpSecret;
+
+
     @Column(name = "role")
     @Enumerated(EnumType.STRING)
     Role role;

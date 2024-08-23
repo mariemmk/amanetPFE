@@ -258,4 +258,9 @@ public class UserServiceImpl implements IUserService {
         return countByStatus;
     }
 
+    @Override
+    public User findByEmail(String email){
+        return  userRepository.findUserByEmail(email);
+    }
+
 }

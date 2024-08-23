@@ -34,7 +34,7 @@ public class ApplicationSecurity extends WebSecurityConfigurerAdapter {
         http.cors().and().authorizeRequests()
 
                 // .antMatchers("/auth/login").permitAll()
-                 .antMatchers("/user/add").permitAll()
+                // .antMatchers("/user/add").permitAll()
                 // .antMatchers("/swagger-ui/**").permitAll()
                 .anyRequest().permitAll();
         // .anyRequest().authenticated();
