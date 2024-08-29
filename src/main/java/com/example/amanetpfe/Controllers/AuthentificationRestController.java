@@ -50,11 +50,11 @@ public class AuthentificationRestController {
 
             int otpCode = OTPUtils.getTOTPCode(user.getTotpSecret());
 
-            String emailBody = String.format("Your OTP code for logging in is: %d", otpCode);
+            String emailBody = String.format("Your code for logging in is: %d", otpCode);
             userService.sendEmail(user.getEmail(), "Your OTP Code", emailBody);
 
             Map<String, String> response = new HashMap<>();
-            response.put("message", "OTP has been sent to your email.");
+            response.put("message", " login code has been sent to your email.");
             return ResponseEntity.ok(response);
         } catch (BadCredentialsException ex) {
             Map<String, String> response = new HashMap<>();

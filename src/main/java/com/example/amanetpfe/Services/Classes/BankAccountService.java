@@ -19,14 +19,16 @@ import java.util.Optional;
 @Service
 public class BankAccountService implements IBankAccountService {
 
-
     @Autowired
-    private  BankAccountRepository bankAccountRepository;
+    private BankAccountRepository bankAccountRepository;
+
     @Autowired
     private TransactionRepository transactionRepository;
+
     @Autowired
     private IUserRepository userRepository;
-
+    @Autowired
+    private EmailSender emailSender;
 
     @Override
     public BankAccount getBankAccountByUser(Integer idUser) {
@@ -35,28 +37,9 @@ public class BankAccountService implements IBankAccountService {
         return bankAccountRepository.findByUser(user);
     }
 
-
-
     @Override
     public BankAccountResponse creditAccount(CreditDebitRequest request) {
-        Optional<BankAccount> optionalAccount = bankAccountRepository.findByAccountNumber(request.getAccountNumber());
-        if (optionalAccount.isPresent()) {
-            BankAccount account = optionalAccount.get();
-            BigDecimal newBalance = account.getAccountBalance().add(request.getAmount());
-            account.setAccountBalance(newBalance);
-            bankAccountRepository.save(account);
-
-            Transaction transaction = new Transaction();
-            transaction.setAccountNumber(request.getAccountNumber());
-            transaction.setTypeTransaction("Credit");
-            transaction.setDevise("TND"); // Replace with actual currency if needed
-            transaction.setAmount(request.getAmount());
-            transaction.setStatus("Success");
-            transactionRepository.save(transaction);
-
-            return new BankAccountResponse("Success", "Account credited successfully");
-        }
-        return new BankAccountResponse("Failure", "Account not found");
+        return updateAccountBalance(request, "Credit");
     }
 
     @Override
@@ -65,20 +48,7 @@ public class BankAccountService implements IBankAccountService {
         if (optionalAccount.isPresent()) {
             BankAccount account = optionalAccount.get();
             if (account.getAccountBalance().compareTo(request.getAmount()) >= 0) {
-                BigDecimal newBalance = account.getAccountBalance().subtract(request.getAmount());
-                account.setAccountBalance(newBalance);
-                bankAccountRepository.save(account);
-
-
-                Transaction transaction = new Transaction();
-                transaction.setAccountNumber(request.getAccountNumber());
-                transaction.setTypeTransaction("Credit");
-                transaction.setDevise("TND"); // Replace with actual currency if needed
-                transaction.setAmount(request.getAmount());
-                transaction.setStatus("Success");
-                transactionRepository.save(transaction);
-
-                return new BankAccountResponse("Success", "Account debited successfully");
+                return updateAccountBalance(request, "Debit");
             } else {
                 return new BankAccountResponse("Failure", "Insufficient funds");
             }
@@ -96,33 +66,20 @@ public class BankAccountService implements IBankAccountService {
             BankAccount destinationAccount = optionalDestinationAccount.get();
 
             if (sourceAccount.getAccountBalance().compareTo(request.getAmount()) >= 0) {
-                BigDecimal newSourceBalance = sourceAccount.getAccountBalance().subtract(request.getAmount());
-                sourceAccount.setAccountBalance(newSourceBalance);
+                updateAccountBalance(sourceAccount, request.getAmount().negate(), "Transfer Out");
+                updateAccountBalance(destinationAccount, request.getAmount(), "Transfer In");
+                EmailDetails emailDetails = EmailDetails.builder()
+                        .recipient(sourceAccount.getUser().getEmail())
+                        .subject("Transfer Successful")
+                        .messageBody("Dear Customer,\n\n" +
+                                "Your transfer of " + request.getAmount() + " TND to account number " + request.getDestinationAccountNumber() + " was successful.\n\n" +
+                                "Thank you for using our services.\n\n" +
+                                "Best regards,\n" +
+                                "Your Bank")
+                        .build();
 
-                BigDecimal newDestinationBalance = destinationAccount.getAccountBalance().add(request.getAmount());
-                destinationAccount.setAccountBalance(newDestinationBalance);
-
-                bankAccountRepository.save(sourceAccount);
-                bankAccountRepository.save(destinationAccount);
-
-
-                // Save transactions
-                Transaction sourceTransaction = new Transaction();
-                sourceTransaction.setAccountNumber(request.getSourceAccountNumber());
-                sourceTransaction.setTypeTransaction("Transfer Out");
-                sourceTransaction.setDevise("TND"); // Replace with actual currency if needed
-                sourceTransaction.setAmount(request.getAmount());
-                sourceTransaction.setStatus("Success");
-                transactionRepository.save(sourceTransaction);
-
-                Transaction destinationTransaction = new Transaction();
-                destinationTransaction.setAccountNumber(request.getDestinationAccountNumber());
-                destinationTransaction.setTypeTransaction("Transfer In");
-                destinationTransaction.setDevise("TND"); // Replace with actual currency if needed
-                destinationTransaction.setAmount(request.getAmount());
-                destinationTransaction.setStatus("Success");
-                transactionRepository.save(destinationTransaction);
-
+                // Send email
+                emailSender.sendEmailAlert(emailDetails);
                 return new BankAccountResponse("Success", "Transfer completed successfully");
             } else {
                 return new BankAccountResponse("Failure", "Insufficient funds in source account");
@@ -134,7 +91,8 @@ public class BankAccountService implements IBankAccountService {
     @Override
     public String nameEnquiry(EnquiryRequest request) {
         Optional<BankAccount> optionalBankAccount = bankAccountRepository.findByAccountNumber(request.getAccountNumber());
-        return optionalBankAccount.map(bankAccount -> bankAccount.getUser().getFirstName() + " " + bankAccount.getUser().getFamilyName()).orElse("Account not found");
+        return optionalBankAccount.map(bankAccount -> bankAccount.getUser().getFirstName() + " " + bankAccount.getUser().getFamilyName())
+                .orElse("Account not found");
     }
 
     @Override
@@ -176,6 +134,8 @@ public class BankAccountService implements IBankAccountService {
         bankAccount.setAccountBalance(newBalance);
         bankAccountRepository.save(bankAccount);
 
+        saveTransaction(bankAccount, transactionDto.getAmount(), "Transaction");
+
         return BankResponse.builder()
                 .responseMessage(AccountUtils.TRANSACTION_SUCCESS)
                 .responseCode(AccountUtils.TRANSACTION_SUCCESS_CODE)
@@ -187,4 +147,40 @@ public class BankAccountService implements IBankAccountService {
                 .build();
     }
 
+    private BankAccountResponse updateAccountBalance(CreditDebitRequest request, String transactionType) {
+        Optional<BankAccount> optionalAccount = bankAccountRepository.findByAccountNumber(request.getAccountNumber());
+        if (optionalAccount.isPresent()) {
+            BankAccount account = optionalAccount.get();
+            BigDecimal newBalance = transactionType.equals("Debit")
+                    ? account.getAccountBalance().subtract(request.getAmount())
+                    : account.getAccountBalance().add(request.getAmount());
+            account.setAccountBalance(newBalance);
+            bankAccountRepository.save(account);
+
+            saveTransaction(account, request.getAmount(), transactionType);
+
+            return new BankAccountResponse("Success", "Account " + transactionType.toLowerCase() + "ed successfully");
+        }
+        return new BankAccountResponse("Failure", "Account not found");
+    }
+
+    private void saveTransaction(BankAccount account, BigDecimal amount, String transactionType) {
+        Transaction transaction = new Transaction();
+        transaction.setBankAccount(account);
+        transaction.setTypeTransaction(transactionType);
+        transaction.setDevise("TND"); // Replace with actual currency if needed
+        transaction.setAmount(amount);
+        transaction.setStatus("Success");
+        transactionRepository.save(transaction);
+    }
+
+    private void updateAccountBalance(BankAccount account, BigDecimal amount, String transactionType) {
+        BigDecimal newBalance = transactionType.equals("Transfer Out")
+                ? account.getAccountBalance().subtract(amount)
+                : account.getAccountBalance().add(amount);
+        account.setAccountBalance(newBalance);
+        bankAccountRepository.save(account);
+
+        saveTransaction(account, amount, transactionType);
+    }
 }

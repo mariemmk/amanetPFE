@@ -16,14 +16,12 @@ import java.util.Map;
 public class BankAccountController {
 
     private final IBankAccountService iBankAccountService;
-
     private final UserServiceImpl userService;
 
-    public BankAccountController(IBankAccountService iBankAccountService , UserServiceImpl userService) {
+    public BankAccountController(IBankAccountService iBankAccountService, UserServiceImpl userService) {
         this.iBankAccountService = iBankAccountService;
-        this.userService=userService;
+        this.userService = userService;
     }
-
 
     @GetMapping("/user/{idUser}")
     public ResponseEntity<BankAccount> getBankAccountByUser(@PathVariable Integer idUser) {
@@ -34,7 +32,6 @@ public class BankAccountController {
             return ResponseEntity.status(404).body(null);
         }
     }
-
 
     @PostMapping("/credit")
     public ResponseEntity<BankAccountResponse> creditAccount(@RequestBody CreditDebitRequest request) {
@@ -54,13 +51,13 @@ public class BankAccountController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/balanceEnquiry")
+    @PostMapping("/balanceEnquiry")
     public ResponseEntity<BankResponse> balanceEnquiry(@RequestBody EnquiryRequest request) {
         BankResponse response = iBankAccountService.balanceEnquiry(request);
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/nameEnquiry")
+    @PostMapping("/nameEnquiry")
     public ResponseEntity<String> nameEnquiry(@RequestBody EnquiryRequest request) {
         String response = iBankAccountService.nameEnquiry(request);
         return ResponseEntity.ok(response);

@@ -105,6 +105,16 @@ public class UserServiceImpl implements IUserService {
         emailSender.sendEmailAlert(emailDetails);
     }
 
+
+    @Override
+    public void updateCodes() {
+        List<User> users = userRepository.findAll();
+        for (User user : users) {
+            String newCode = generateNewCode();
+            user.setCodeVerif(newCode);
+            userRepository.save(user);
+        }
+    }
     @Override
     public BankResponse approveAccountRequest(Integer idRequest) {
         AccountRequest accountRequest = getAccountRequestById(idRequest);
@@ -178,17 +188,29 @@ public class UserServiceImpl implements IUserService {
         String verificationCode = generateNewCode();
         user.setCodeVerif(verificationCode);
         userRepository.save(user);
-        sendEmail(user.getEmail(), "Code de Verification", "Votre code de verification: " + verificationCode);
+        String userEmail = user.getEmail();
+        String emailSubject = "Code de  Verification";
+        String emailText = "Votre code de verification : "+verificationCode;
+        emailSender.sendEmail(userEmail, emailSubject, emailText);
         return true;
     }
-
     @Override
     public boolean isVerificationCodeValid(String email, String verificationCode) {
         User user = userRepository.findUserByEmail(email);
-        if (user == null || user.getCodeVerif() == null || user.getCodeVerif().isEmpty()) {
-            return false;
+        if (user == null) {
+            return false; // L'utilisateur n'existe pas
         }
-        return user.getCodeVerif().equals(verificationCode);
+
+        String storedVerificationCode = user.getCodeVerif();
+
+        if (storedVerificationCode == null || storedVerificationCode.isEmpty()) {
+            return false; // Aucun code de vérification n'est enregistré pour cet utilisateur
+        }
+
+        boolean isValid = storedVerificationCode.equals(verificationCode);
+
+        return isValid;
+
     }
 
     @Override
@@ -197,6 +219,7 @@ public class UserServiceImpl implements IUserService {
         if (user == null) {
             return false;
         }
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         String encodedNewPassword = passwordEncoder.encode(newPassword);
         if (!encodedNewPassword.equals(user.getLastPassword())) {
             user.setLastPassword(user.getPassword());
@@ -205,13 +228,32 @@ public class UserServiceImpl implements IUserService {
             user.setLastModifiedAt(new Date());
             userRepository.save(user);
             return true;
-        } else {
+        }else{
             return false;
         }
     }
 
+    @Override
+    public boolean isVerificationCodeValidVerif(String email, String verificationCode) {
+        User user = userRepository.findUserByEmail(email);
+        if (user == null) {
+            return false; // L'utilisateur n'existe pas
+        }
+
+        String storedVerificationCode = user.getCodeVerif();
+
+        if (storedVerificationCode == null || storedVerificationCode.isEmpty()) {
+            return false; // Aucun code de vérification n'est enregistré pour cet utilisateur
+        }
+
+        boolean isValid = storedVerificationCode.equals(verificationCode);
+        user.setIsVerified(true);
+        userRepository.save(user);
 
 
+        return isValid;
+
+    }
 
     public String generateNewCode() {
         int codeLength = 6;
@@ -227,8 +269,6 @@ public class UserServiceImpl implements IUserService {
 
         return code.toString();
     }
-
-
     @Override
     public boolean checkOldPassword(String password, Integer idUser) {
         User user = userRepository.findById(idUser).orElse(null);
@@ -240,7 +280,18 @@ public class UserServiceImpl implements IUserService {
         }
         return false;
     }
-
+    @Override
+    public User banUser(Integer idUser) {
+        Optional<User> userOptional = userRepository.findById(idUser);
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            user.setIsBanned(true);
+            return userRepository.save(user);
+        } else {
+            // Handle the case where the user with the given ID doesn't exist
+            return null;
+        }
+    }
 
     @Override
     public List<AccountRequest> getAllAccountRequests() {
@@ -261,6 +312,24 @@ public class UserServiceImpl implements IUserService {
     @Override
     public User findByEmail(String email){
         return  userRepository.findUserByEmail(email);
+    }
+
+
+
+    @Override
+    public User updateContactDetails(Integer idUser, String phoneNumber, String address) {
+        User user = retrieveUser(idUser);
+        if (user != null) {
+            if (phoneNumber != null && !phoneNumber.isEmpty()) {
+                user.setPhoneNumber(phoneNumber);
+            }
+            if (address != null && !address.isEmpty()) {
+                user.setAddress(address);
+            }
+            return updateUser(user);
+        } else {
+            throw new RuntimeException("User not found with id: " + idUser);
+        }
     }
 
 }

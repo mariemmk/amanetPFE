@@ -19,6 +19,8 @@ public interface IUserService {
 
     void sendEmail(String recipient, String subject, String body);
 
+    void updateCodes();
+
     BankResponse approveAccountRequest(Integer idRequest);
 
     String afficheIdentiteBancair(Integer idUser);
@@ -36,8 +38,11 @@ public interface IUserService {
     boolean changePassword(String email, String newPassword);
 
 
+    boolean isVerificationCodeValidVerif(String email, String verificationCode);
 
     boolean checkOldPassword(String password, Integer idUser);
+
+    User banUser(Integer idUser);
 
     List<AccountRequest> getAllAccountRequests();
 
@@ -45,4 +50,6 @@ public interface IUserService {
 
 
     User findByEmail(String email);
+
+    User updateContactDetails(Integer idUser, String phoneNumber, String address);
 }

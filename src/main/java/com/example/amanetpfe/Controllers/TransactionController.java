@@ -10,9 +10,12 @@ import com.example.amanetpfe.dto.LoanDetailsResponse;
 import com.example.amanetpfe.Services.Classes.TransactionService;
 import com.example.amanetpfe.dto.InvestmentResponse;
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 
 
@@ -34,7 +37,16 @@ public class TransactionController {
 
     }
 
+  /* @GetMapping("TransactionsByAccountNumber")
+   public List<Transaction> getTransactionsByAccountNumber(@RequestParam("AccountNumber") String AccountNumber){
+        return transactionService.getTransactionByAccountNumber(AccountNumber);
 
+   }    */
+   @GetMapping("/transactionsByDate")
+
+    public List<Transaction> getTransactionsByDate(@RequestParam("date") Date date) {
+        return transactionService.getTransactionsByDate(date);
+    }
     @GetMapping("/transactions")
     public List<Transaction> getAllTransactions() {
         return transactionService.retrieveAllTransactions();
@@ -45,5 +57,15 @@ public class TransactionController {
     public InvestmentResponse simulateInvestment(@RequestParam  double amount , @RequestParam LocalDate issueDate , @RequestParam LocalDate maturityDate){
         return investmentService.simulateInvestment(amount ,issueDate , maturityDate);
     }
+    @PostMapping("/perform")
+    public void performTransaction(@RequestParam String accountNumber,
+                                   @RequestParam BigDecimal amount,
+                                   @RequestParam String typeTransaction) {
+        transactionService.performTransaction(accountNumber, amount, typeTransaction);
+    }
 
+    @GetMapping("/transactionsByAccountNumber")
+    public List<Transaction> getTransactionsByAccountNumber(@RequestParam("accountNumber") String accountNumber) {
+        return transactionService.getTransactionsByAccountNumber(accountNumber);
+    }
 }

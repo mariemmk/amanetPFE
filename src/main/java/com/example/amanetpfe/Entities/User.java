@@ -80,6 +80,13 @@ public class User implements Serializable, UserDetails {
     @Column(name = "lastDateChangePassword")
     Date lastDateChangePassword;
 
+    @Column(name = "isBanned")
+    Boolean isBanned;
+
+    @Column(name = "isVerified")
+    Boolean isVerified;
+
+
     @Column(name = "address")
     String address;
 

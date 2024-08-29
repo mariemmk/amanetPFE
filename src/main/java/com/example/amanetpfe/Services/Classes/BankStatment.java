@@ -27,7 +27,7 @@ public class BankStatment {
         LocalDate end = LocalDate.parse(endDate, formatter).plusDays(1); // Add 1 day to include transactions on the end date
 
         List<Transaction> transactionList = transactionRepository.findAll().stream()
-                .filter(transaction -> transaction.getAccountNumber().equals(accountNumber))
+              //  .filter(transaction -> transaction.getAccountNumber().equals(accountNumber))
                 .filter(transaction -> transaction.getCreatedAt().toLocalDateTime().isAfter(start.atStartOfDay()))
                 .filter(transaction -> transaction.getCreatedAt().toLocalDateTime().isBefore(end.atStartOfDay()))
                 .collect(Collectors.toList());

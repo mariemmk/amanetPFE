@@ -57,33 +57,33 @@ public class UserRestController {
 
     @PostMapping("/send-verification-code")
     public ResponseEntity<String> sendVerificationCodeByEmail(@RequestBody String email) {
-        if (userService.sendVerificationCodeByEmail(email)) {
+        if(userService.sendVerificationCodeByEmail(email)){
             return ResponseEntity.ok("");
         }
-        return ResponseEntity.badRequest().body("Erreur lors de l'envoi du code de vérification");
+        return ResponseEntity.ok("erreur");
     }
 
     @PostMapping("/changePassword")
-    public ResponseEntity<String> changePassword(@RequestBody ChangePasswordRequest request) {
-        boolean passwordChanged = userService.changePassword(request.getEmail(), request.getNewPass());
-        if (passwordChanged) {
-            return ResponseEntity.ok("Mot de passe modifié avec succès");
-        }
-        return ResponseEntity.badRequest().body("Erreur lors du changement de mot de passe");
+    public boolean changePassword(@RequestBody ChangePasswordRequest request) {
+
+        return userService.changePassword(request.getEmail(), request.getNewPass());
     }
 
     @PostMapping("/verify-code")
-    public ResponseEntity<Boolean> verifyVerificationCode(@RequestParam String email, @RequestBody String verificationCode) {
-        boolean codeValid = userService.isVerificationCodeValid(email, verificationCode);
-        return ResponseEntity.ok(codeValid);
+    public Boolean verifyVerificationCode(@RequestBody String email, @RequestParam String verificationCode) {
+        return userService.isVerificationCodeValid(email, verificationCode);
     }
+
 
     @PostMapping("/verifyOldPassword/{idUser}")
     public ResponseEntity<Boolean> verifyOldPassword( @RequestBody String oldPassword,@PathVariable("idUser") Integer idUser) {
         boolean passwordValid = userService.checkOldPassword(oldPassword,idUser );
         return ResponseEntity.ok(passwordValid);
     }
-
+    @PostMapping("/verify-code-Compte")
+    public boolean verifyVerificationCodeverif(@RequestBody String email, @RequestParam String verificationCode) {
+        return userService.isVerificationCodeValidVerif(email, verificationCode);
+    }
 
 
     @PostMapping("/creationAccount")
@@ -136,4 +136,24 @@ public class UserRestController {
     public List<AccountRequest> getAllAccountRequests() {
         return userService.getAllAccountRequests();
     }
+
+
+
+    @GetMapping("/resetCode")
+    public void updateCodes() {
+        userService.updateCodes();
+    }
+
+    @PutMapping("/editContactDetails/{idUser}")
+    @Operation(description = "Edit user's phone number and address")
+    public ResponseEntity<User> updateContactDetails(@PathVariable("idUser") Integer idUser,
+                                                     @RequestBody Map<String, String> updates) {
+        String newPhoneNumber = updates.get("phoneNumber");
+        String newAddress = updates.get("address");
+
+        User updatedUser = userService.updateContactDetails(idUser, newPhoneNumber, newAddress);
+        return ResponseEntity.ok(updatedUser);
+    }
+
+
 }
