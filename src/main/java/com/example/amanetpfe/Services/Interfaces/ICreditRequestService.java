@@ -25,6 +25,8 @@ public interface ICreditRequestService {
     double Credim_Express(double amount, int duration);
 
 
+    Credit getCreditWithAmortizationSchedule(Long creditId);
+
     Credit createCreditRequest(String loanType, BigDecimal amount, int duration, Integer idUser,
                                Double carPrice, Integer horsepower, String employeur,
                                String addressEmplyeur, String postOccupe,
@@ -51,4 +53,6 @@ public interface ICreditRequestService {
 
     // Method to count credits by status
     List<Object[]> countCreditsByStatus();
+
+    List<AmortizationEntry> getAmortizationEntriesByCreditId(Long id);
 }

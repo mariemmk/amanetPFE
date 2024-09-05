@@ -224,4 +224,9 @@ public class CreditRequestController {
         creditRequestService.removeCreditRequest(id);
 
     }
+
+    @GetMapping("/credit/{id}")
+    public List<AmortizationEntry> getAmortizationEntriesByCreditId(@PathVariable Long id) {
+        return creditRequestService.getAmortizationEntriesByCreditId(id);
+    }
 }

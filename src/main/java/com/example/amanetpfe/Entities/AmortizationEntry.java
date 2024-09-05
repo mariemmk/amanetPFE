@@ -24,17 +24,19 @@ public class AmortizationEntry {
     private BigDecimal principal;
     private BigDecimal interest;
     private BigDecimal remainingBalance;
-
+    private BigDecimal monthlyPayment;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "credit_id")
     @JsonIgnore
     private Credit credit;
 
-    public AmortizationEntry(int month, BigDecimal principal, BigDecimal interest, BigDecimal remainingBalance, Credit credit) {
+    // New constructor including monthlyPayment
+    public AmortizationEntry(int month, BigDecimal principal, BigDecimal interest, BigDecimal remainingBalance, BigDecimal monthlyPayment, Credit credit) {
         this.month = month;
         this.principal = principal;
         this.interest = interest;
         this.remainingBalance = remainingBalance;
+        this.monthlyPayment = monthlyPayment;
         this.credit = credit;
     }
 }

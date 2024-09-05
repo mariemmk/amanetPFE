@@ -39,9 +39,9 @@ public class Credit {
 
     private User user;
 
-    @OneToMany(mappedBy = "credit", fetch = FetchType.LAZY)
-
+    @OneToMany(mappedBy = "credit", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AmortizationEntry> amortizationSchedule;
+
 
 
 }

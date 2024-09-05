@@ -5,6 +5,7 @@ import com.example.amanetpfe.Entities.Credit;
 import com.example.amanetpfe.Entities.User;
 import com.example.amanetpfe.Repositories.CreditRequestRepository;
 import com.example.amanetpfe.Repositories.IUserRepository;
+import com.example.amanetpfe.Repositories.amortizationEntryRepository;
 import com.example.amanetpfe.Services.Interfaces.ICreditRequestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,6 +14,7 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.transaction.Transactional;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -35,6 +37,9 @@ public class CreditRequestService implements ICreditRequestService {
 
     @Autowired
     private CreditRequestRepository creditRepository;
+
+    @Autowired
+    private amortizationEntryRepository amortizationEntryRepository;
 
 
     @Autowired
@@ -147,6 +152,7 @@ public class CreditRequestService implements ICreditRequestService {
                     BigDecimal.valueOf(principalPayment),
                     BigDecimal.valueOf(interestPayment),
                     BigDecimal.valueOf(remainingBalance),
+                    BigDecimal.valueOf(monthlyPayment),
                     null
             ));
         }
@@ -172,18 +178,31 @@ public class CreditRequestService implements ICreditRequestService {
         }
     }
 
+
     @Override
+    public Credit getCreditWithAmortizationSchedule(Long creditId) {
+        return creditRepository.findById(creditId)
+                .orElseThrow(() -> new RuntimeException("Credit not found"));
+    }
+
+
+    @Override
+    @Transactional
     public Credit createCreditRequest(String loanType, BigDecimal amount, int duration, Integer idUser,
                                       Double carPrice, Integer horsepower, String employeur,
                                       String addressEmplyeur, String postOccupe,
                                       BigDecimal revenuMensuels, String typeContract,
                                       String creditEnCours, MultipartFile file) {
-        User user = userRepository.findById(idUser).orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Fetch the user from the database
+        User user = userRepository.findById(idUser)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
         double rate;
-        double monthlyPayment = 0;
-        List<AmortizationEntry> amortizationEntries = null;
+        double monthlyPayment;
+        List<AmortizationEntry> amortizationEntries;
 
+        // Calculate payment and create amortization entries based on loan type
         switch (loanType) {
             case "Preslaire_amenagement":
                 if (duration > 3) {
@@ -204,6 +223,7 @@ public class CreditRequestService implements ICreditRequestService {
                 amount = details.getMaxCreditAmount();
                 amortizationEntries = createAmortizationSchedule(amount, rate, duration);
                 break;
+
             case "Credim_Watani":
                 rate = 13;
                 monthlyPayment = Credim_Watani(amount.doubleValue(), duration, loanType);
@@ -222,14 +242,14 @@ public class CreditRequestService implements ICreditRequestService {
 
         // Save the file and get the file path
         String filePath = saveFile(file);
-        // Supprimer la redéfinition de la variable monthlyPayment ici
 
+        // Create Credit entity with monthly payment included
         Credit credit = Credit.builder()
                 .loanType(loanType)
                 .amount(amount)
                 .duration(duration)
                 .interestRate(BigDecimal.valueOf(rate))
-                .monthlyPayment(BigDecimal.valueOf(monthlyPayment))
+                .monthlyPayment(BigDecimal.valueOf(monthlyPayment)) // Set the monthly payment
                 .requestDate(LocalDate.now())
                 .status("PENDING")
                 .user(user)
@@ -242,19 +262,27 @@ public class CreditRequestService implements ICreditRequestService {
                 .filePath(filePath)
                 .build();
 
+        // Save the Credit entity first to generate the ID
+        Credit savedCredit = creditRepository.save(credit);
+
         List<AmortizationEntry> amortizationSchedule = amortizationEntries.stream()
                 .map(entry -> new AmortizationEntry(
                         entry.getMonth(),
                         entry.getPrincipal(),
                         entry.getInterest(),
                         entry.getRemainingBalance(),
+                        entry.getMonthlyPayment(),
                         credit
                 ))
                 .collect(Collectors.toList());
 
         credit.setAmortizationSchedule(amortizationSchedule);
 
-        return creditRepository.save(credit);
+        // Save the AmortizationEntries with the reference to the saved Credit entity
+        amortizationEntries.forEach(entry -> entry.setCredit(savedCredit));
+        amortizationEntryRepository.saveAll(amortizationEntries);
+
+        return savedCredit;
     }
 
 
@@ -346,6 +374,9 @@ public class CreditRequestService implements ICreditRequestService {
     public List<Object[]> countCreditsByStatus() {
         return creditRepository.countCreditsByStatus();
     }
-
+    @Override
+    public List<AmortizationEntry> getAmortizationEntriesByCreditId(Long id) {
+        return amortizationEntryRepository.findByCreditId(id);
+    }
 
 }
