@@ -41,5 +41,14 @@ public interface ICreditRequestService {
 
   //  Credit approveCredit(Long id);
 
+    Credit approveCredit(Long id);
+
     Credit rejectCreditRequest(Long id);
+
+    List<Credit> getCreditsByUserId(Integer idUser);
+
+    List<Object[]> countCreditsByType();
+
+    // Method to count credits by status
+    List<Object[]> countCreditsByStatus();
 }

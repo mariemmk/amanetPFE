@@ -13,6 +13,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -132,21 +133,34 @@ public class User implements Serializable, UserDetails {
         return true;
     }
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     @JsonIgnore
     List<Credit> credits;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     @JsonIgnore
     private List<Income> incomes;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     @JsonIgnore
     private List<Expense> expenses;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @OneToOne(mappedBy = "user",  fetch = FetchType.LAZY, orphanRemoval = true)
     @JsonIgnore
     private BankAccount bankAccount;
+
+    public void setAccountBalance(BigDecimal accountBalance) {
+        if (this.bankAccount != null) {
+            this.bankAccount.setAccountBalance(accountBalance);
+        }
+    }
+
+    public BigDecimal getAccountBalance() {
+        if (this.bankAccount != null) {
+            return this.bankAccount.getAccountBalance();
+        }
+        return null; // or return 0.0 if you prefer a default value
+    }
 
 
 }

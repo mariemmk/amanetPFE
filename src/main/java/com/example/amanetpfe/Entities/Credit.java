@@ -34,13 +34,13 @@ public class Credit {
     private String typeContract;
     private String creditEnCours;
     private String filePath;
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne()
     @JoinColumn(name = "id_user", nullable = false)
 
     private User user;
 
-    @OneToMany(mappedBy = "credit", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-      // Ignore this field in certain contexts
+    @OneToMany(mappedBy = "credit", fetch = FetchType.LAZY)
+
     private List<AmortizationEntry> amortizationSchedule;
 
 

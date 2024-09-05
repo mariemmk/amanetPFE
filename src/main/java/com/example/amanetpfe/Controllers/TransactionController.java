@@ -68,4 +68,9 @@ public class TransactionController {
     public List<Transaction> getTransactionsByAccountNumber(@RequestParam("accountNumber") String accountNumber) {
         return transactionService.getTransactionsByAccountNumber(accountNumber);
     }
+
+    @DeleteMapping("/deletTransaction/{transactionId}")
+    public void deleteTransaction(@PathVariable("transactionId") Long transactionId){
+       transactionService.deleteTransaction(transactionId);
+    }
 }

@@ -20,6 +20,7 @@ import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -169,5 +170,58 @@ public class CreditRequestController {
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
+    }
+
+    @PutMapping("/approve/{id}")
+    public ResponseEntity<Credit> approveCredit(@PathVariable Long id) {
+        Credit approvedCredit = creditRequestService.approveCredit(id);
+        return ResponseEntity.ok(approvedCredit);
+    }
+
+    @GetMapping("/user/{idUser}")
+    public ResponseEntity<List<Credit>> getCreditsByUserId(@PathVariable Integer idUser) {
+        List<Credit> credits = creditRequestService.getCreditsByUserId(idUser);
+        return ResponseEntity.ok(credits);
+    }
+
+
+    @PutMapping("/reject/{id}")
+    public ResponseEntity<Credit> rejectCreditRequest(@PathVariable Long id) {
+        try {
+            Credit rejectedCredit = creditRequestService.rejectCreditRequest(id);
+            return new ResponseEntity<>(rejectedCredit, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            // Return 404 if the credit request was not found
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            // Handle other exceptions, return 500 if necessary
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/count-by-credit-type")
+    public ResponseEntity<Map<String, Integer>> getCountByCreditType() {
+        List<Object[]> results = creditRequestService.countCreditsByType();
+        Map<String, Integer> countByType = new HashMap<>();
+        for (Object[] result : results) {
+            countByType.put((String) result[0], ((Number) result[1]).intValue());
+        }
+        return ResponseEntity.ok(countByType);
+    }
+
+    @GetMapping("/count-by-status")
+    public ResponseEntity<Map<String, Integer>> getCountByStatus() {
+        List<Object[]> results = creditRequestService.countCreditsByStatus();
+        Map<String, Integer> countByStatus = new HashMap<>();
+        for (Object[] result : results) {
+            countByStatus.put((String) result[0], ((Number) result[1]).intValue());
+        }
+        return ResponseEntity.ok(countByStatus);
+    }
+
+    @DeleteMapping("deletcredit/{id}")
+    public void deletCredit(@PathVariable("id") Long id){
+        creditRequestService.removeCreditRequest(id);
+
     }
 }

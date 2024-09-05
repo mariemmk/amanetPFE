@@ -10,7 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -154,6 +153,9 @@ public class UserRestController {
         User updatedUser = userService.updateContactDetails(idUser, newPhoneNumber, newAddress);
         return ResponseEntity.ok(updatedUser);
     }
+    @GetMapping("/getuserbyemail")
+    public User getUserByEmail(@RequestParam ("email") String email){
+         return userService.findByEmail(email);
 
-
+    }
 }

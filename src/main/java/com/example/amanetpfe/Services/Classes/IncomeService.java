@@ -9,7 +9,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.time.YearMonth;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -40,4 +44,45 @@ public class IncomeService implements  IIncomeService {
         incomeRepository.deleteById(idIncome);
 
     }
+    @Override
+    public Income updateIncome(Long idIncome, Income updatedIncome) {
+        // Find the existing income by its ID
+        Income existingIncome = incomeRepository.findById(idIncome).orElse(null);
+
+        if (existingIncome != null) {
+            // Update the existing income details with the new values
+            existingIncome.setAmount(updatedIncome.getAmount());
+            existingIncome.setCategory(updatedIncome.getCategory());
+            existingIncome.setDate(updatedIncome.getDate());
+            // Add more fields to update as necessary
+
+            // Save the updated income back to the repository
+            return incomeRepository.save(existingIncome);
+        }
+
+        // Return null or throw an exception if the income is not found
+        return null;
+    }
+
+    @Override
+    public Map<YearMonth, BigDecimal> getMonthlyIncome(Integer idUser) {
+        List<Income> incomes = getAllIncomes(idUser);
+        Map<YearMonth, BigDecimal> monthlyIncome = new HashMap<>();
+
+        for (Income income : incomes) {
+            try {
+                if (income.getDate() != null) {
+                    YearMonth yearMonth = YearMonth.from(income.getDate());
+                    monthlyIncome.merge(yearMonth, income.getAmount(), BigDecimal::add);
+                } else {
+                    System.err.println("Expense date is null");
+                }
+            } catch (Exception e) {
+                System.err.println("Error processing expense: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+        return monthlyIncome;
+    }
+
 }

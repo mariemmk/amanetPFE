@@ -35,7 +35,7 @@ public class BankAccount implements Serializable {
     @JoinColumn(name = "id_user", referencedColumnName = "idUser", nullable = false)
     @JsonIgnore
     private User user;
-    @OneToMany(mappedBy = "bankAccount", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "bankAccount", fetch = FetchType.LAZY)
     @JsonIgnore
     private Set<Transaction> transactions;
 

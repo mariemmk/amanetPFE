@@ -35,7 +35,7 @@ public class JwtTokenUtil {
         }
         return Jwts.builder()
             .setSubject(String.format("%s,%s",user.getIdUser(), user.getEmail()))
-            .setIssuer("Trador")
+            .setIssuer("amennet")
             .setIssuedAt(new Date())
             .setExpiration(new Date(System.currentTimeMillis()+EXPIRE_DURATION))
             .signWith(SignatureAlgorithm.RS256, privateKey)

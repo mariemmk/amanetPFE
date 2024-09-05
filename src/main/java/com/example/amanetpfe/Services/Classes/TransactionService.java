@@ -70,12 +70,7 @@ private IUserRepository userRepository;
         return transactionRepository.findTransactionsByCreatedAtBetween(startDate, endDate);
     }
 
-   /* @Override
 
-    public  List<Transaction> getTransactionByAccountNumber(String AccountNumber){
-        return transactionRepository.findTransactionsByAccountNumber(AccountNumber);
-
-    }*/
 
     @Override
     @Transactional
@@ -114,4 +109,8 @@ private IUserRepository userRepository;
         return transactionRepository.findByBankAccount_AccountNumber(accountNumber);
     }
 
+    @Override
+    public void deleteTransaction(Long transactionId){
+        transactionRepository.deleteById(transactionId);
+    }
 }

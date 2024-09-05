@@ -1,6 +1,7 @@
 package com.example.amanetpfe.Repositories;
 
 import com.example.amanetpfe.Entities.Credit;
+import com.example.amanetpfe.Entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -15,4 +16,6 @@ public interface CreditRequestRepository extends JpaRepository<Credit, Long> {
 
     @Query("SELECT c.status, COUNT(c) FROM Credit c GROUP BY c.status")
     List<Object[]> countCreditsByStatus();
+
+    List<Credit> findByUser(User user);
 }

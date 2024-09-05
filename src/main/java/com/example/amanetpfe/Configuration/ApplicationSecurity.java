@@ -72,14 +72,12 @@ public class ApplicationSecurity extends WebSecurityConfigurerAdapter {
 
     @Bean
     public CorsFilter corsFilter() {
-
-        CorsConfiguration config = new CorsConfiguration();
-        config.setAllowCredentials(true);
-        config.addAllowedOrigin("http://localhost:4200"); // Mettez ici l'origine de votre frontend
-        config.addAllowedHeader("*");
-        config.addAllowedMethod("*");
-
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        CorsConfiguration config = new CorsConfiguration();
+        //config.setAllowCredentials(true);
+        config.addAllowedOrigin("*");
+        config.addAllowedHeader("*");  // Allow all headers
+        config.addAllowedMethod("*");  // Allow all methods (GET, POST, etc.)
         source.registerCorsConfiguration("/**", config);
         return new CorsFilter(source);
     }

@@ -29,4 +29,5 @@ public interface ITransactionService {
     List<Transaction> getTransactionsByAccountNumber(String accountNumber);
 
 
+    void deleteTransaction(Long transactionId);
 }

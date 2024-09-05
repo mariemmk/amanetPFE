@@ -5,7 +5,6 @@ import com.example.amanetpfe.Entities.Credit;
 import com.example.amanetpfe.Entities.User;
 import com.example.amanetpfe.Repositories.CreditRequestRepository;
 import com.example.amanetpfe.Repositories.IUserRepository;
-import com.example.amanetpfe.Repositories.TransactionRepository;
 import com.example.amanetpfe.Services.Interfaces.ICreditRequestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -289,7 +288,7 @@ public class CreditRequestService implements ICreditRequestService {
 
 
 
-  /*  @Override
+    @Override
     public Credit approveCredit(Long id) {
         Credit credit = creditRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid credit ID: " + id));
@@ -318,7 +317,7 @@ public class CreditRequestService implements ICreditRequestService {
 
         // Save the updated credit
         return creditRepository.save(credit);
-    }*/
+    }
     @Override
     public Credit rejectCreditRequest(Long id) {
         Optional<Credit> optionalCreditRequest = creditRepository.findById(id);
@@ -330,6 +329,23 @@ public class CreditRequestService implements ICreditRequestService {
         throw new IllegalArgumentException("Credit request not found");
     }
 
+    @Override
+    public List<Credit> getCreditsByUserId(Integer idUser) {
+        // Vérifier si l'utilisateur existe
+        User user = userRepository.findById(idUser)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Récupérer tous les crédits liés à cet utilisateur
+        return creditRepository.findByUser(user);
+    }
+    @Override
+    public List<Object[]> countCreditsByType() {
+        return creditRepository.countCreditsByType();
+    }
+    @Override
+    public List<Object[]> countCreditsByStatus() {
+        return creditRepository.countCreditsByStatus();
+    }
 
 
 }

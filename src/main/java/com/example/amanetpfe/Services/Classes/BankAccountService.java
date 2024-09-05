@@ -27,8 +27,6 @@ public class BankAccountService implements IBankAccountService {
 
     @Autowired
     private IUserRepository userRepository;
-    @Autowired
-    private EmailSender emailSender;
 
     @Override
     public BankAccount getBankAccountByUser(Integer idUser) {
@@ -68,18 +66,7 @@ public class BankAccountService implements IBankAccountService {
             if (sourceAccount.getAccountBalance().compareTo(request.getAmount()) >= 0) {
                 updateAccountBalance(sourceAccount, request.getAmount().negate(), "Transfer Out");
                 updateAccountBalance(destinationAccount, request.getAmount(), "Transfer In");
-                EmailDetails emailDetails = EmailDetails.builder()
-                        .recipient(sourceAccount.getUser().getEmail())
-                        .subject("Transfer Successful")
-                        .messageBody("Dear Customer,\n\n" +
-                                "Your transfer of " + request.getAmount() + " TND to account number " + request.getDestinationAccountNumber() + " was successful.\n\n" +
-                                "Thank you for using our services.\n\n" +
-                                "Best regards,\n" +
-                                "Your Bank")
-                        .build();
 
-                // Send email
-                emailSender.sendEmailAlert(emailDetails);
                 return new BankAccountResponse("Success", "Transfer completed successfully");
             } else {
                 return new BankAccountResponse("Failure", "Insufficient funds in source account");
