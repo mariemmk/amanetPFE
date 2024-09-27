@@ -1,7 +1,6 @@
 package com.example.amanetpfe.Services.Classes;
 
 import com.example.amanetpfe.Entities.BankAccount;
-import com.example.amanetpfe.Entities.Role;
 import com.example.amanetpfe.Entities.User;
 import com.example.amanetpfe.Repositories.BankAccountRepository;
 import com.example.amanetpfe.Repositories.IUserRepository;
@@ -16,7 +15,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import java.math.BigDecimal;
 import java.util.*;
 
@@ -131,9 +129,30 @@ public class UserServiceImpl implements IUserService {
         return BankResponse.builder()
                 .responseCode(AccountUtils.ACCOUNT_CREATION_SUCCESS)
                 .responseMessage("Account creation request approved successfully.")
+                .accountRequest(accountRequest)
                 .build();
     }
 
+
+
+    @Override
+    public  BankResponse declineAccountRequest(Integer idRequest){
+
+        AccountRequest accountRequest = getAccountRequestById(idRequest);
+        accountRequest.setStatus("DECLINE");
+        accountRequest.setResponseDate(new Date());
+        accountRequestRepository.save(accountRequest);
+
+
+        sendEmail(accountRequest.getUser().getEmail(), "Account Creation Refused",
+                "Your account creation request has been Refused. Your account number is: " );
+
+        return BankResponse.builder()
+                .responseCode(AccountUtils.ACCOUNT_CREATION_FAILED)
+                .responseMessage("Account creation request REFUSED.")
+                .accountRequest(accountRequest)
+                .build();
+    }
     private AccountRequest getAccountRequestById(Integer requestId) {
         return accountRequestRepository.findById(requestId)
                 .orElseThrow(() -> new UserNotFoundException("Request not found"));

@@ -88,6 +88,7 @@ public class AuthentificationRestController {
             response.put("error", "Invalid OTP");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
+
     }
 
     @PostMapping("/getCurrentUser")

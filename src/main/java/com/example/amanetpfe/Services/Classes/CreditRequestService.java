@@ -286,6 +286,9 @@ public class CreditRequestService implements ICreditRequestService {
     }
 
 
+
+
+    //delete the credit request only with no changes
     @Override
     public void removeCreditRequest(Long id) {
         creditRepository.deleteById(id);
@@ -330,22 +333,25 @@ public class CreditRequestService implements ICreditRequestService {
         BigDecimal accountBalance = user.getAccountBalance();
 
         if (accountBalance == null) {
-            accountBalance = BigDecimal.ZERO; // Default to zero if null
+            accountBalance = BigDecimal.ZERO; //ken null yekteb 0 (salla7 l erreur)
         }
 
-        // Perform the approval logic, e.g., updating user account balance
+        // updating user account balance
         BigDecimal updatedBalance = accountBalance.add(credit.getAmount());
         user.setAccountBalance(updatedBalance);
 
-        // Save the updated user
         userRepository.save(user);
 
-        // Update the credit status or other fields as necessary
+        // Update the credit status
+
         credit.setStatus("Approved");
 
         // Save the updated credit
         return creditRepository.save(credit);
     }
+
+
+    //reject the credit request
     @Override
     public Credit rejectCreditRequest(Long id) {
         Optional<Credit> optionalCreditRequest = creditRepository.findById(id);

@@ -23,6 +23,8 @@ public interface IUserService {
 
     BankResponse approveAccountRequest(Integer idRequest);
 
+    BankResponse declineAccountRequest(Integer idRequest);
+
     String afficheIdentiteBancair(Integer idUser);
 
     User retrieveUser(Integer idUser);

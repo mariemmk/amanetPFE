@@ -28,6 +28,6 @@ public class AccountRequest {
 
     @ManyToOne
     @JoinColumn(name = "idUser")
-    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"}) // Ignorer les propriétés Hibernate spécifiques à la sérialisation
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private User user;
 }

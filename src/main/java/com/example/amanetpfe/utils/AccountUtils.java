@@ -5,6 +5,9 @@ import java.util.Random;
 
 public class AccountUtils {
 
+
+
+
     public static String  generateAccountNumber(){
 
         Year currentYear = Year.now();
@@ -44,6 +47,10 @@ public class AccountUtils {
     public  static final String ACCOUNT_EXIST_MESSAGE="this user already has an account";
     public  static  final  String ACCOUNT_CREATION_SUCCESS="002";
     public static final String ACCOUNT_CREATION_MESSAGE="account has been successfully created";
+
+    public  static  final  String ACCOUNT_CREATION_FAILED="011";
+    public static final String ACCOUNT_CREATION_FAILED_MESSAGE="account has been Refused";
+
     public  static final String ACCOUNT_NOT_EXIST_CODE ="003";
     public static final String ACCOUNT_NOT_EXIST_MESSAGE ="user with the provided account number does not exist";
     public  static final String ACCOUNT_FOUND_CODE ="004";
@@ -70,6 +77,7 @@ public class AccountUtils {
     public static final String TRANSACTION_SUCCESS="010";
 
     public static final String TRANSACTION_SUCCESS_CODE ="transaction successful";
+    public static final String TRANSACTION_FAILURE_CODE ="014" ;
 }
 
 

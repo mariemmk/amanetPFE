@@ -95,6 +95,13 @@ public class UserRestController {
         BankResponse response = userService.approveAccountRequest(idRequest);
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("/REFUSE-request/{idRequest}")
+    public ResponseEntity<BankResponse> DeclineAccountRequest(@PathVariable Integer idRequest) {
+        BankResponse response = userService.declineAccountRequest(idRequest);
+        return ResponseEntity.ok(response);
+    }
+
    /* @PostMapping("/credit")
     public ResponseEntity<BankResponse> creditAccount(@RequestBody CreditDebitRequest request) {
         BankResponse response = userService.creditAccount(request);
