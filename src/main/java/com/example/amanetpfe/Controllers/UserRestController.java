@@ -102,31 +102,7 @@ public class UserRestController {
         return ResponseEntity.ok(response);
     }
 
-   /* @PostMapping("/credit")
-    public ResponseEntity<BankResponse> creditAccount(@RequestBody CreditDebitRequest request) {
-        BankResponse response = userService.creditAccount(request);
-        return ResponseEntity.ok(response);
-    }
 
-    @PostMapping("/debit")e
-    public ResponseEntity<BankResponse> debitAccount(@RequestBody CreditDebitRequest request) {
-        BankResponse response = userService.debitAccount(request);
-        return ResponseEntity.ok(response);
-    }
-
-    @PostMapping("/transfer")
-    public ResponseEntity<BankResponse> transfer(@RequestBody TransferRequest request) {
-        BankResponse response = userService.transfer(request);
-        return ResponseEntity.ok(response);
-    }
-
-
-
-    @GetMapping("/budget/{idUser}")
-    public ResponseEntity<Map<String, BigDecimal>> getBudget(@PathVariable Integer idUser) {
-        Map<String, BigDecimal> budget = userService.calculateBudget(idUser);
-        return ResponseEntity.ok(budget);
-    }*/
    @GetMapping("/identiteBancaire/{idUser}")
    public ResponseEntity<String> afficheIdentiteBancaire(@PathVariable("idUser") Integer idUser) {
        String userBankDetails = userService.afficheIdentiteBancair(idUser);

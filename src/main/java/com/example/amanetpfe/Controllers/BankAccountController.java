@@ -51,17 +51,6 @@ public class BankAccountController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/balanceEnquiry")
-    public ResponseEntity<BankResponse> balanceEnquiry(@RequestBody EnquiryRequest request) {
-        BankResponse response = iBankAccountService.balanceEnquiry(request);
-        return ResponseEntity.ok(response);
-    }
-
-    @PostMapping("/nameEnquiry")
-    public ResponseEntity<String> nameEnquiry(@RequestBody EnquiryRequest request) {
-        String response = iBankAccountService.nameEnquiry(request);
-        return ResponseEntity.ok(response);
-    }
 
     @GetMapping("/account-requests/count-by-status")
     public Map<String, Long> getAccountRequestCountByStatus() {

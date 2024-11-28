@@ -13,9 +13,7 @@ public interface IBankAccountService {
 
     BankAccountResponse transfer(TransferRequest request);
 
-    String nameEnquiry(EnquiryRequest request);
 
-    BankResponse balanceEnquiry(EnquiryRequest request);
 
     BankResponse updateAccountBalance(TransactionDto transactionDto);
 }

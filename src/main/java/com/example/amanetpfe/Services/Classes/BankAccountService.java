@@ -56,18 +56,18 @@ public class BankAccountService implements IBankAccountService {
 
     @Override
     public BankAccountResponse transfer(TransferRequest request) {
-        Optional<BankAccount> optionalSourceAccount = bankAccountRepository.findByAccountNumber(request.getSourceAccountNumber());
-        Optional<BankAccount> optionalDestinationAccount = bankAccountRepository.findByAccountNumber(request.getDestinationAccountNumber());
+        Optional<BankAccount> SourceAccount = bankAccountRepository.findByAccountNumber(request.getSourceAccountNumber());
+        Optional<BankAccount> DestinationAccount = bankAccountRepository.findByAccountNumber(request.getDestinationAccountNumber());
 
-        if (optionalSourceAccount.isPresent() && optionalDestinationAccount.isPresent()) {
-            BankAccount sourceAccount = optionalSourceAccount.get();
-            BankAccount destinationAccount = optionalDestinationAccount.get();
+        if (SourceAccount.isPresent() && DestinationAccount.isPresent()) {
+            BankAccount sourceAccount = SourceAccount.get();
+            BankAccount destinationAccount = DestinationAccount.get();
 
-            // Check if source account has sufficient funds
+            // verifie si l compte had suffisament funds
             if (sourceAccount.getAccountBalance().compareTo(request.getAmount()) >= 0) {
-                // Perform debit from source account
+                // debit from source
                 updateAccountBalance(sourceAccount.getAccountNumber(), request.getAmount(), "Transfer Out");
-                // Perform credit to destination account
+                //  credit to destination
                 updateAccountBalance(destinationAccount.getAccountNumber(), request.getAmount(), "Transfer In");
 
                 return new BankAccountResponse("Success", "Transfer completed successfully");
@@ -78,35 +78,6 @@ public class BankAccountService implements IBankAccountService {
         return new BankAccountResponse("Failure", "Source or destination account not found");
     }
 
-    @Override
-    public String nameEnquiry(EnquiryRequest request) {
-        Optional<BankAccount> optionalBankAccount = bankAccountRepository.findByAccountNumber(request.getAccountNumber());
-        return optionalBankAccount.map(bankAccount -> bankAccount.getUser().getFirstName() + " " + bankAccount.getUser().getFamilyName())
-                .orElse("Account not found");
-    }
-
-    @Override
-    public BankResponse balanceEnquiry(EnquiryRequest request) {
-        Optional<BankAccount> optionalBankAccount = bankAccountRepository.findByAccountNumber(request.getAccountNumber());
-        if (optionalBankAccount.isEmpty()) {
-            return BankResponse.builder()
-                    .responseCode(AccountUtils.ACCOUNT_NOT_EXIST_CODE)
-                    .responseMessage(AccountUtils.ACCOUNT_NOT_EXIST_MESSAGE)
-                    .accountInfo(null)
-                    .build();
-        }
-
-        BankAccount bankAccount = optionalBankAccount.get();
-        return BankResponse.builder()
-                .responseMessage(AccountUtils.ACCOUNT_FOUND_SUCCESS)
-                .responseCode(AccountUtils.ACCOUNT_FOUND_CODE)
-                .accountInfo(AccountInfo.builder()
-                        .accountBalance(bankAccount.getAccountBalance())
-                        .accountName(bankAccount.getUser().getFirstName() + " " + bankAccount.getUser().getFamilyName())
-                        .accountNumber(bankAccount.getAccountNumber())
-                        .build())
-                .build();
-    }
 
     @Override
     public BankResponse updateAccountBalance(TransactionDto transactionDto) {
@@ -116,7 +87,7 @@ public class BankAccountService implements IBankAccountService {
                 transactionDto.getTypeTransaction()
         );
 
-        // Convert BankAccountResponse to BankResponse
+        // BankAccountResponse to BankResponse
         BankResponse bankResponse = new BankResponse();
         bankResponse.setResponseMessage(accountResponse.getMessage());
 
@@ -125,8 +96,6 @@ public class BankAccountService implements IBankAccountService {
         } else {
             bankResponse.setResponseCode(AccountUtils.TRANSACTION_FAILURE_CODE);  // Define the failure code appropriately
         }
-
-        // If needed, map additional fields such as account information
         return bankResponse;
     }
 
@@ -138,7 +107,7 @@ public class BankAccountService implements IBankAccountService {
             BigDecimal newBalance;
 
             if ("Debit".equalsIgnoreCase(transactionType)) {
-                // Ensure sufficient funds for debit transactions
+                // solde suffisent
                 if (account.getAccountBalance().compareTo(amount) >= 0) {
                     newBalance = account.getAccountBalance().subtract(amount);
                 } else {

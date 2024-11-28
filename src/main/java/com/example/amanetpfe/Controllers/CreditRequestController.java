@@ -191,10 +191,9 @@ public class CreditRequestController {
             Credit rejectedCredit = creditRequestService.rejectCreditRequest(id);
             return new ResponseEntity<>(rejectedCredit, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
-            // Return 404 if the credit request was not found
+            //  credit request  not found
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (Exception e) {
-            // Handle other exceptions, return 500 if necessary
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

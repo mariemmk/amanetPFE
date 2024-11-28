@@ -22,9 +22,7 @@ public class Transaction {
     @Column(name = "id_transaction")
     private Long transactionId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "account_number", referencedColumnName = "accountNumber", nullable = false)
-    private BankAccount bankAccount;
+
 
     @Column(name = "type_transaction")
     private String typeTransaction;
@@ -45,6 +43,8 @@ public class Transaction {
     @UpdateTimestamp
     @Column(name = "modified_at")
     private Timestamp modifiedAt;
-
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "account_number", referencedColumnName = "accountNumber", nullable = false)
+    private BankAccount bankAccount;
 
 }

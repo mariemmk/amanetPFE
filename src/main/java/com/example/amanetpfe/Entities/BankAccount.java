@@ -5,6 +5,7 @@ import lombok.*;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -35,9 +36,9 @@ public class BankAccount implements Serializable {
     @JoinColumn(name = "id_user", referencedColumnName = "idUser", nullable = false)
     @JsonIgnore
     private User user;
-    @OneToMany(mappedBy = "bankAccount", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "bankAccount", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonIgnore
-    private Set<Transaction> transactions;
+    private Set<Transaction> transactions = new HashSet<>();
 
 
 }
